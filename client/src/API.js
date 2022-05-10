@@ -2,7 +2,7 @@ import axios from 'axios';
 import { updateHeader } from 'interceptors/token';
 
 const version = 'v1';
-const baseUrl = 'http://bileg:8080/' + version;
+const baseUrl = 'http://127.0.0.1:8080/' + version;
 updateHeader(axios);
 
 export async function getUser(username) {

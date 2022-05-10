@@ -22,11 +22,14 @@ export default function Login() {
             password: data.get('password'),
         };
 
-        const isLogged = await handleLogin(user);
-        if (isLogged) {
+        const loggedSuccesfully = await handleLogin(user);
+
+        if (loggedSuccesfully) {
             let dbUser = await getUser(user.username);
             navigate('/home', { state: { userRole: dbUser.role } });
-        } else console.log('Error');
+        } else {
+            console.log('error');
+        }
     }
 
     return (
@@ -43,7 +46,12 @@ export default function Login() {
                 <Typography component='h1' variant='h5'>
                     Sign in
                 </Typography>
-                <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                <Box
+                    component='form'
+                    onSubmit={handleSubmit}
+                    noValidate
+                    sx={{ mt: 1 }}
+                >
                     <TextField
                         margin='normal'
                         required
@@ -64,8 +72,16 @@ export default function Login() {
                         id='password'
                         autoComplete='current-password'
                     />
-                    <FormControlLabel control={<Checkbox value='remember' color='primary' />} label='Remember me' />
-                    <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
+                    <FormControlLabel
+                        control={<Checkbox value='remember' color='primary' />}
+                        label='Remember me'
+                    />
+                    <Button
+                        type='submit'
+                        fullWidth
+                        variant='contained'
+                        sx={{ mt: 3, mb: 2 }}
+                    >
                         Sign In
                     </Button>
                 </Box>

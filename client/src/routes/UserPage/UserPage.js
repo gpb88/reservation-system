@@ -7,7 +7,6 @@ import AddUser from './AddUser';
 import DeleteUser from './DeleteUser';
 
 const columns = [
-    { field: 'user_id', headerName: 'User ID', flex: 1, minWidth: 150 },
     { field: 'username', headerName: 'Username', flex: 1, minWidth: 150 },
     { field: 'role', headerName: 'Role', flex: 1, minWidth: 150 },
 ];
