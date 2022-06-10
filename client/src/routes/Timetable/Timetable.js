@@ -1,77 +1,215 @@
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
-import Select from '@mui/material/Select';
-import Box from '@mui/material/Box';
-import MenuItem from '@mui/material/MenuItem';
-import InputLabel from '@mui/material/InputLabel';
-import Checkbox from '@mui/material/Checkbox';
-import FormControl from '@mui/material/FormControl';
-import WeekCalendar from 'react-week-calendar';
-import 'react-week-calendar/dist/style.css';
-import { useEffect, useState } from 'react';
-import { getMachines, getPermissions, getUsers, updatePermissions } from 'API';
-import React from 'react';
-import moment from 'moment';
+import React, { Component } from 'react';
+import { AppointmentPicker } from 'react-appointment-picker';
+import 'styles/timetable.css';
 
-export default class PermissionPage extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            lastUid: 1,
-            selectedIntervals: [],
-        };
-    }
-
-    handleEventRemove = (event) => {
-        const { selectedIntervals } = this.state;
-        const index = selectedIntervals.findIndex((interval) => interval.uid === event.uid);
-        if (index > -1) {
-            selectedIntervals.splice(index, 1);
-            this.setState({ selectedIntervals });
-        }
+class Timetable extends Component {
+    state = {
+        loading: false,
     };
 
-    handleEventUpdate = (event) => {
-        const { selectedIntervals } = this.state;
-        const index = selectedIntervals.findIndex((interval) => interval.uid === event.uid);
-        if (index > -1) {
-            selectedIntervals[index] = event;
-            this.setState({ selectedIntervals });
-        }
+    addAppointmentCallback = (appointment) => {
+        let { day, number, time, id } = appointment.addedAppointment;
+        let addCb = appointment.addCb;
+
+        this.setState(
+            {
+                loading: true,
+            },
+            async () => {
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                console.log(
+                    `Added appointment ${number}, day ${day}, time ${time}, id ${id}`
+                );
+                addCb(day, number, time, id);
+                this.setState({ loading: false });
+            }
+        );
     };
 
-    handleSelect = (newIntervals) => {
-        const { lastUid, selectedIntervals } = this.state;
-        const intervals = newIntervals.map((interval, index) => {
-            return {
-                ...interval,
-                uid: lastUid + index,
-            };
-        });
-
-        this.setState({
-            selectedIntervals: selectedIntervals.concat(intervals),
-            lastUid: lastUid + newIntervals.length,
-        });
+    removeAppointmentCallback = ({ day, number, time, id }, removeCb) => {
+        this.setState(
+            {
+                loading: true,
+            },
+            async () => {
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+                console.log(
+                    `Removed appointment ${number}, day ${day}, time ${time}, id ${id}`
+                );
+                removeCb(day, number);
+                this.setState({ loading: false });
+            }
+        );
     };
 
     render() {
+        const days = [
+            [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                {
+                    id: 2,
+                    number: 2,
+                    isReserved: false,
+                    isSelected: false,
+                    periods: 3,
+                },
+                {
+                    id: 2,
+                    number: 2,
+                    isReserved: false,
+                    isSelected: false,
+                    periods: 3,
+                },
+                {
+                    id: 2,
+                    number: 2,
+                    isReserved: false,
+                    isSelected: false,
+                    periods: 3,
+                },
+                {
+                    id: 2,
+                    number: 2,
+                    isReserved: false,
+                    isSelected: false,
+                    periods: 3,
+                },
+                {
+                    id: 2,
+                    number: 2,
+                    isReserved: false,
+                    isSelected: false,
+                    periods: 3,
+                },
+                {
+                    id: 2,
+                    number: 2,
+                    isReserved: false,
+                    isSelected: false,
+                    periods: 3,
+                },
+                {
+                    id: 2,
+                    number: 2,
+                    isReserved: false,
+                    isSelected: false,
+                    periods: 3,
+                },
+                {
+                    id: 2,
+                    number: 2,
+                    isReserved: false,
+                    isSelected: false,
+                    periods: 3,
+                },
+                {
+                    id: 2,
+                    number: 2,
+                    isReserved: false,
+                    isSelected: false,
+                    periods: 3,
+                },
+                {
+                    id: 2,
+                    number: 2,
+                    isReserved: false,
+                    isSelected: false,
+                    periods: 3,
+                },
+                {
+                    id: 2,
+                    number: 2,
+                    isReserved: false,
+                    isSelected: false,
+                    periods: 3,
+                },
+            ],
+            [
+                null,
+                null,
+                null,
+                { id: 2, number: 2 },
+                { id: 3, number: 3, isReserved: true },
+                { id: 4, number: 4 },
+                { id: 5, number: 5 },
+                { id: 6, number: 6 },
+                { id: 7, number: 7 },
+                { id: 8, number: 8 },
+                { id: 9, number: 9 },
+                { id: 10, number: 10 },
+                { id: 11, number: 11 },
+            ],
+            [
+                null,
+                null,
+                null,
+                { id: 2, number: 2 },
+                { id: 3, number: 3, isReserved: true },
+                { id: 4, number: 4 },
+                { id: 5, number: 5 },
+                { id: 6, number: 6 },
+                { id: 7, number: 7 },
+                { id: 8, number: 8 },
+                { id: 9, number: 9 },
+                { id: 10, number: 10 },
+                { id: 11, number: 11 },
+            ],
+            [
+                null,
+                null,
+                null,
+                { id: 2, number: 2 },
+                { id: 3, number: 3, isReserved: true },
+                { id: 4, number: 4 },
+                { id: 5, number: 5 },
+                { id: 6, number: 6 },
+                { id: 7, number: 7 },
+                { id: 8, number: 8 },
+                { id: 9, number: 9 },
+                { id: 10, number: 10 },
+                { id: 11, number: 11 },
+            ],
+            [
+                null,
+                null,
+                null,
+                { id: 2, number: 2 },
+                { id: 3, number: 3, isReserved: true },
+                { id: 4, number: 4 },
+                { id: 5, number: 5 },
+                { id: 6, number: 6 },
+                { id: 7, number: 7 },
+                { id: 8, number: 8 },
+                { id: 9, number: 9 },
+                { id: 10, number: 10 },
+                { id: 11, number: 11 },
+            ],
+        ];
+        const { loading } = this.state;
         return (
-            <div id='timetable'>
-                <WeekCalendar
-					startTime = {moment({h: 7, m: 0})}
-					endTime = {moment({h: 22, m: 0})}
-                    scaleUnit={60}
-                    scaleHeaderTitle='Time'
-                    cellHeight={50}
-					numberOfDays={5}
-                    selectedIntervals={this.state.selectedIntervals}
-                    onIntervalSelect={this.handleSelect}
-                    onIntervalUpdate={this.handleEventUpdate} 	
-                    onIntervalRemove={this.handleEventRemove}
-                ></WeekCalendar>
+            <div className='appointment-table'>
+                <AppointmentPicker
+                    addAppointmentCallback={this.addAppointmentCallback}
+                    removeAppointmentCallback={this.removeAppointmentCallback}
+                    initialDay={new Date('2022-06-13')}
+                    days={days}
+                    maxReservableAppointments={3}
+                    alpha
+                    visible
+                    selectedByDefault
+                    loading={loading}
+                    unitTime={30 * 60 * 1000}
+                />
             </div>
         );
     }
 }
+
+export default Timetable;

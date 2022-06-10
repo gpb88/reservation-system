@@ -1,0 +1,33 @@
+.appointment-table {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.appointment-content {
+	font-size: 1.6em !important;
+	width: 80%;
+	margin-top: 50px;
+}
+
+.appointment-picker .blank {
+	height: 0;
+}
+
+.appointment-picker__col__name {
+	margin-bottom: 10px !important;
+}
+
+.appointment {
+	height: 40px !important;
+}
+
+.appointment-picker {
+	font-size: 1.6em !important;
+	width: 100%;
+}
+
+.appointment-picker__col {
+	flex: auto;
+}
