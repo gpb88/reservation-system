@@ -38,7 +38,9 @@ export async function validateToken(token) {
 
 export async function getToken(user) {
     const result = await axios
-        .get(baseUrl + '/token', { params: { username: user.username, role: user.role } })
+        .get(baseUrl + '/token', {
+            params: { username: user.username, role: user.role },
+        })
         .then(function (response) {
             console.log(response.config.url, response);
             return response;
@@ -145,6 +147,39 @@ export async function updatePermissions(userID, permissions) {
         .post(baseUrl + '/permissions', {
             userID: userID,
             permissions: JSON.stringify(permissions),
+        })
+        .then(function (response) {
+            console.log(response.config.url, response);
+            return response.data;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function getClasses() {
+	const result = await axios
+			.get(baseUrl + '/classes')
+			.then(function (response) {
+					console.log(response.config.url, response);
+					return response.data.classes;
+			})
+			.catch(function (error) {
+					console.error(error);
+			});
+
+	return result;
+}
+
+export async function addClass(userID, title, startTime, endTime) {
+    const result = await axios
+        .post(baseUrl + '/classes', {
+            userID: userID,
+            title: title,
+            startTime: startTime,
+            endTime: endTime,
         })
         .then(function (response) {
             console.log(response.config.url, response);

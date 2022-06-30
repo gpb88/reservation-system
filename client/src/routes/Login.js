@@ -26,7 +26,9 @@ export default function Login() {
 
         if (loggedSuccesfully) {
             let dbUser = await getUser(user.username);
-            navigate('/home', { state: { userRole: dbUser.role } });
+            navigate('/home', {
+                state: { user: user.username, userRole: dbUser.role },
+            });
         } else {
             console.log('error');
         }

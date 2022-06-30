@@ -50,7 +50,8 @@ export default function PermissionPage() {
                 updatedMachines.forEach((machine) => {
                     machine.hasPermission = false;
                     permitedMachines.forEach((permitedMachine) => {
-                        if (machine.machine_id === permitedMachine.machine_id) machine.hasPermission = true;
+                        if (machine.machine_id === permitedMachine.machine_id)
+                            machine.hasPermission = true;
                     });
                 });
                 console.log(updatedMachines);
@@ -88,7 +89,9 @@ export default function PermissionPage() {
             <Grid container sx={{ width: '30%', ml: 6, mb: 6 }}>
                 <Grid item xs={6}>
                     <FormControl fullWidth>
-                        <InputLabel id='select-user-label'>Select user</InputLabel>
+                        <InputLabel id='select-user-label'>
+                            Select user
+                        </InputLabel>
                         <Select
                             labelId='select-user-label'
                             label='Select user'
@@ -105,7 +108,11 @@ export default function PermissionPage() {
                     </FormControl>
                 </Grid>
                 <Grid item xs={6}>
-                    <Button variant='contained' sx={{ fontSize: '1.3rem' }} onClick={handlePermissionSave}>
+                    <Button
+                        variant='contained'
+                        sx={{ fontSize: '1.3rem' }}
+                        onClick={handlePermissionSave}
+                    >
                         Save settings
                     </Button>
                 </Grid>
@@ -113,14 +120,32 @@ export default function PermissionPage() {
             <div style={{ width: '70%' }}>
                 <Box sx={{ mx: 6 }}>
                     <Grid container rowSpacing={2} direction='column'>
-                        <Grid container sx={{ pb: 3, borderBottom: '1px solid rgba(0, 0, 0, 0.27)' }}>
-                            <Grid item xs={6} sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Typography variant='h4' sx={{ width: '100%' }} align='center'>
+                        <Grid
+                            container
+                            sx={{
+                                pb: 3,
+                                borderBottom: '1px solid rgba(0, 0, 0, 0.27)',
+                            }}
+                        >
+                            <Grid
+                                item
+                                xs={6}
+                                sx={{ display: 'flex', alignItems: 'center' }}
+                            >
+                                <Typography
+                                    variant='h4'
+                                    sx={{ width: '100%' }}
+                                    align='center'
+                                >
                                     Machine
                                 </Typography>
                             </Grid>
                             <Grid item xs={6}>
-                                <Typography variant='h4' sx={{ width: '100%' }} align='center'>
+                                <Typography
+                                    variant='h4'
+                                    sx={{ width: '100%' }}
+                                    align='center'
+                                >
                                     Permission
                                 </Typography>
                             </Grid>
@@ -132,13 +157,18 @@ export default function PermissionPage() {
                                       container
                                       sx={{
                                           p: 2,
-                                          borderBottom: '1px solid rgba(0, 0, 0, 0.27)',
+                                          borderBottom:
+                                              '1px solid rgba(0, 0, 0, 0.27)',
                                       }}
                                   >
                                       <Grid
                                           item
                                           xs={6}
-                                          sx={{ display: 'flex', alignItems: 'center', justifyItems: 'center' }}
+                                          sx={{
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyItems: 'center',
+                                          }}
                                       >
                                           <Typography
                                               variant='h6'
@@ -153,11 +183,20 @@ export default function PermissionPage() {
                                       <Grid
                                           item
                                           xs={6}
-                                          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                          sx={{
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                          }}
                                       >
                                           <Checkbox
                                               checked={machine.hasPermission}
-                                              onChange={(e) => handlePermissionChange(e, machine)}
+                                              onChange={(e) =>
+                                                  handlePermissionChange(
+                                                      e,
+                                                      machine
+                                                  )
+                                              }
                                           />
                                       </Grid>
                                   </Grid>

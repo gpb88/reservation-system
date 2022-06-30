@@ -212,6 +212,48 @@ async function revokePermission(userID, machineID) {
     return result;
 }
 
+async function getClasses() {
+    const query = {
+        text: `
+			SELECT * 
+			FROM classes`,
+    };
+
+    let result = await client
+        .query(query)
+        .then((res) => {
+            return res.rows;
+        })
+        .catch((e) => {
+            console.error(e.stack);
+            throw e.stack;
+        });
+
+    return result;
+}
+
+async function addClass(userID, title, startTime, endTime) {
+    const query = {
+        text: `
+			INSERT INTO classes 
+				(user_id, title, start_time, end_time)
+			VALUES 
+				('${userID}', '${title}', '${startTime}', '${endTime}')`,
+    };
+
+    let result = await client
+        .query(query)
+        .then((res) => {
+            return res;
+        })
+        .catch((e) => {
+            console.log(e.stack);
+            throw e.stack;
+        });
+
+    return result;
+}
+
 module.exports = {
     client,
     initDbConn,
@@ -224,4 +266,6 @@ module.exports = {
     addPermission,
     revokePermission,
     deleteUser,
+    getClasses,
+    addClass,
 };

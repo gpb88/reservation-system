@@ -1,0 +1,13 @@
+.add-class {
+	width: 40%;
+	margin: 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.description{
+	border-radius: 5px;
+	border-color: rgba(0, 0, 0, 0.23);
+	padding: 5px;
+}

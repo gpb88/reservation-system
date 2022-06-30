@@ -11,7 +11,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE machines (
-  machine_id  serial PRIMARY KEY
+  machine_id serial PRIMARY KEY
 , machine_name varchar(60) NOT NULL 
 , description text
 );
@@ -20,4 +20,12 @@ CREATE TABLE permissions (
   user_id serial REFERENCES users (user_id) ON UPDATE CASCADE ON DELETE CASCADE
 , machine_id int REFERENCES machines (machine_id) ON UPDATE CASCADE
 , CONSTRAINT user_machines_pkey PRIMARY KEY (user_id, machine_id)
+);
+
+CREATE TABLE classes (
+  class_id serial PRIMARY KEY
+, user_id int REFERENCES users (user_id) ON UPDATE CASCADE ON DELETE CASCADE
+, title varchar(150) NOT NULL
+, start_time varchar(100) NOT NULL
+, end_time varchar(100) NOT NULL
 );

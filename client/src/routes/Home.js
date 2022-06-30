@@ -2,15 +2,12 @@ import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
 import UserPage from 'routes/UserPage/UserPage';
 import Timetable from 'routes/Timetable/Timetable';
+import AddClass from 'routes/AddClass/AddClass';
 import PermissionPage from 'routes/PermissionPage/PermissionPage';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -19,13 +16,14 @@ import { deleteToken } from 'services/handleLogin';
 
 export default function Home() {
     let navigate = useNavigate();
-    const [anchorElNav, setAnchorElNav] = React.useState(null);
     const { state } = useLocation();
     const defaultPage =
         state.userRole == 'admin' ? <UserPage /> : <Timetable />;
     let [pageComponent, setPageComponent] = React.useState(defaultPage);
     const pages =
-        state.userRole == 'admin' ? ['Users', 'Permissions'] : ['Timetable'];
+        state.userRole == 'admin'
+            ? ['Users', 'Permissions']
+            : ['Timetable', 'Add class'];
 
     useEffect(() => {
         console.log(state);
@@ -46,6 +44,10 @@ export default function Home() {
                 break;
             case 'Timetable':
                 setPageComponent(<Timetable />);
+                break;
+
+            case 'Add class':
+                setPageComponent(<AddClass user={state.user} />);
                 break;
             default:
                 const defaultPage =
