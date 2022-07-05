@@ -13,5 +13,5 @@ export const PrivateRoute = () => {
     }, []);
 
     if (authed === null) return null;
-    return authed ? <Outlet /> : <Navigate to='/login' />;
+    return authed ? <Outlet /> : <Navigate to='/' />;
 };
