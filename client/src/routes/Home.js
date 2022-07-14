@@ -5,9 +5,10 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
-import UserPage from 'routes/UserPage/UserPage';
+import Users from 'routes/Users/Users';
 import Timetable from 'routes/Timetable/Timetable';
 import AddClass from 'routes/AddClass/AddClass';
+import Machines from 'routes/Machines/Machines';
 import PermissionPage from 'routes/PermissionPage/PermissionPage';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -17,12 +18,10 @@ import { deleteToken } from 'services/handleLogin';
 export default function Home() {
     let navigate = useNavigate();
     const { state } = useLocation();
-    const defaultPage =
-        state.userRole == 'admin' ? <UserPage /> : <Timetable />;
-    let [pageComponent, setPageComponent] = React.useState(defaultPage);
+    let [pageComponent, setPageComponent] = React.useState(<Timetable />);
     const pages =
         state.userRole == 'admin'
-            ? ['Users', 'Permissions']
+            ? ['Timetable', 'Add class', 'Users', 'Machines', 'Permissions']
             : ['Timetable', 'Add class'];
 
     useEffect(() => {
@@ -37,7 +36,7 @@ export default function Home() {
     const switchPage = (page) => {
         switch (page) {
             case 'Users':
-                setPageComponent(<UserPage />);
+                setPageComponent(<Users />);
                 break;
             case 'Permissions':
                 setPageComponent(<PermissionPage />);
@@ -45,14 +44,14 @@ export default function Home() {
             case 'Timetable':
                 setPageComponent(<Timetable />);
                 break;
-
             case 'Add class':
                 setPageComponent(<AddClass user={state.user} />);
                 break;
+            case 'Machines':
+                setPageComponent(<Machines />);
+                break;
             default:
-                const defaultPage =
-                    state.userRole == 'admin' ? <UserPage /> : <Timetable />;
-                setPageComponent(defaultPage);
+                setPageComponent(<Timetable />);
                 break;
         }
     };

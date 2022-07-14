@@ -25,14 +25,18 @@ export default function Login() {
         const loggedSuccesfully = await handleLogin(user);
 
         if (loggedSuccesfully) {
-            let dbUser = await getUser(user.username);
-            navigate('/home', {
-                state: { user: user.username, userRole: dbUser.role },
-            });
+            handleRedirect(user);
         } else {
             console.log('error');
         }
     }
+
+    const handleRedirect = async (user) => {
+        let dbUser = await getUser(user.username);
+        navigate('/home', {
+            state: { user: user.username, userRole: dbUser.role },
+        });
+    };
 
     return (
         <Container maxWidth='xs'>
@@ -43,6 +47,8 @@ export default function Login() {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    alignContent: 'center',
+                    justifyItems: 'center',
                 }}
             >
                 <Typography component='h1' variant='h5'>

@@ -78,6 +78,69 @@ async function getMachines() {
     return result;
 }
 
+async function getMachine(name) {
+    const query = {
+        text: `
+		SELECT * 
+		FROM machines
+		WHERE machine_name='${name}'
+		LIMIT 1`,
+    };
+
+    let result = await client
+        .query(query)
+        .then((res) => {
+            return res.rows;
+        })
+        .catch((e) => {
+            console.error(e.stack);
+            throw e.stack;
+        });
+
+    return result;
+}
+
+async function addMachine(name, description) {
+    const query = {
+        text: `
+		INSERT INTO machines 
+			(machine_name, description)
+		VALUES 
+			('${name}', '${description}')`,
+    };
+
+    let result = await client
+        .query(query)
+        .then((res) => {
+            return res;
+        })
+        .catch((e) => {
+            console.log(e.stack);
+            throw e.stack;
+        });
+
+    return result;
+}
+
+async function deleteMachine(name) {
+    const query = {
+        text: `DELETE FROM machines
+				WHERE machine_name='${name}'`,
+    };
+
+    let result = await client
+        .query(query)
+        .then((res) => {
+            return res;
+        })
+        .catch((e) => {
+            console.log(e.stack);
+            throw e.stack;
+        });
+
+    return result;
+}
+
 async function getUsers() {
     const query = {
         text: `
@@ -260,6 +323,9 @@ module.exports = {
     getUser,
     getRoles,
     getMachines,
+    getMachine,
+    addMachine,
+    deleteMachine,
     getUsers,
     getPermisions,
     addUser,

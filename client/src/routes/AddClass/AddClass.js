@@ -10,6 +10,8 @@ import 'styles/add-class.css';
 import { getClasses, addClass, getUser } from 'API';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
@@ -25,6 +27,11 @@ export default function AddClass(props) {
     const [openErrorAlert, setOpenErrorAlert] = useState(false);
     const [errorMessage, setErrorMessage] = useState('Error occurred');
     const [classes, setClasses] = useState([]);
+    const [machine, setMachine] = React.useState('');
+
+    const handleChangeMachine = (event) => {
+        setMachine(event.target.value);
+    };
 
     const setDefaultErrorMessage = () => {
         setErrorMessage('Error occurred');
@@ -114,7 +121,8 @@ export default function AddClass(props) {
         const currentDate = new Date(time);
         const selectedDate = new Date(startTime);
 
-        if (currentDate.getTime() <= selectedDate.getTime()) isAvailable = false;
+        if (currentDate.getTime() <= selectedDate.getTime())
+            isAvailable = false;
 
         return isAvailable;
     };
@@ -252,6 +260,30 @@ export default function AddClass(props) {
                             ]}
                             filterTime={filterEndDate}
                         />
+                    </Grid>
+                    <Grid item xs={3}>
+                        <Typography variant='h5' component='div' align='center'>
+                            Machine
+                        </Typography>
+                    </Grid>
+                    <Grid
+                        item
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                        }}
+                        xs={9}
+                    >
+                        <Select
+                            value={machine}
+                            label='Machine'
+                            onChange={handleChangeMachine}
+                            sx={{ width: '80%' }}
+                        >
+                            <MenuItem value={10}>Ten</MenuItem>
+                            <MenuItem value={20}>Twenty</MenuItem>
+                            <MenuItem value={30}>Thirty</MenuItem>
+                        </Select>
                     </Grid>
                     <Grid
                         xs={12}

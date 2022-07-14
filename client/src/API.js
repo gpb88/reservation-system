@@ -66,12 +66,43 @@ export async function getRoles() {
     return result;
 }
 
+export async function addMachine(name, description) {
+    const result = await axios
+        .post(baseUrl + '/machines', {
+            name: name,
+            description: description,
+        })
+        .then(function (response) {
+            console.log(response.config.url, response);
+            return response.data;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
 export async function getMachines() {
     const result = await axios
         .get(baseUrl + '/machines')
         .then(function (response) {
             console.log(response.config.url, response);
             return response.data.machines;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function deleteMachine(name) {
+    const result = await axios
+        .delete(baseUrl + '/machines', { data: { name: name } })
+        .then(function (response) {
+            console.log(response.config.url, response);
+            return response.data;
         })
         .catch(function (error) {
             console.error(error);
@@ -160,17 +191,17 @@ export async function updatePermissions(userID, permissions) {
 }
 
 export async function getClasses() {
-	const result = await axios
-			.get(baseUrl + '/classes')
-			.then(function (response) {
-					console.log(response.config.url, response);
-					return response.data.classes;
-			})
-			.catch(function (error) {
-					console.error(error);
-			});
+    const result = await axios
+        .get(baseUrl + '/classes')
+        .then(function (response) {
+            console.log(response.config.url, response);
+            return response.data.classes;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
 
-	return result;
+    return result;
 }
 
 export async function addClass(userID, title, startTime, endTime) {

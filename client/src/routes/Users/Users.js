@@ -15,9 +15,9 @@ export default function UserPage() {
     const [users, setUsers] = useState([]);
     const [isAddWindowOpen, setIsAddWindowOpen] = useState(false);
     const [isDeletePromptOpen, setIsDeletePromptOpen] = useState(false);
-    const [userToDelete, setUserToDelete] = useState('');
+    const [deleteTarget, setDeleteTarget] = useState('');
 
-    const handleAddUserWindow = () => {
+    const handleAddWindow = () => {
         setIsAddWindowOpen(!isAddWindowOpen);
     };
 
@@ -25,7 +25,7 @@ export default function UserPage() {
         setIsDeletePromptOpen(!isDeletePromptOpen);
     };
 
-    const refreshUsers = () => {
+    const refreshData = () => {
         getUsers().then((response) => {
             console.log(response);
             setUsers(response);
@@ -33,7 +33,7 @@ export default function UserPage() {
     };
 
     useEffect(() => {
-        refreshUsers();
+        refreshData();
     }, []);
 
     return (
@@ -41,7 +41,11 @@ export default function UserPage() {
             <Typography variant='h4' component='h1' sx={{ m: 6 }}>
                 User management
             </Typography>
-            <Button variant='contained' sx={{ ml: 6, mb: 6, fontSize: '1.3rem' }} onClick={handleAddUserWindow}>
+            <Button
+                variant='contained'
+                sx={{ ml: 6, mb: 6, fontSize: '1.3rem' }}
+                onClick={handleAddWindow}
+            >
                 Add new user
             </Button>
             <div style={{ width: '60%' }}>
@@ -51,22 +55,35 @@ export default function UserPage() {
                     columns={columns}
                     pageSize={5}
                     rowsPerPageOptions={[5]}
-                    sx={{ fontSize: '1.5rem', ml: 6, width: '100%', userSelect: 'none !important' }}
+                    sx={{
+                        fontSize: '1.5rem',
+                        ml: 6,
+                        width: '100%',
+                        userSelect: 'none !important',
+                    }}
                     autoHeight={true}
                     disableSelectionOnClick
-                    loading={users.length == 0}
                     disableColumnFilter
                     disableColumnMenu
                     disableColumnSelector
                     disableDensitySelector
                     onRowDoubleClick={(data) => {
-                        setUserToDelete(data.row.username);
+                        setDeleteTarget(data.row.username);
                         handleDeletePrompt();
                     }}
                 />
             </div>
-            <AddUser open={isAddWindowOpen} handleClose={handleAddUserWindow} refreshUsers={refreshUsers} />
-            <DeleteUser open={isDeletePromptOpen} handleClose={handleDeletePrompt} user={userToDelete} refreshUsers={refreshUsers}/>
+            <AddUser
+                open={isAddWindowOpen}
+                handleClose={handleAddWindow}
+                refreshData={refreshData}
+            />
+            <DeleteUser
+                open={isDeletePromptOpen}
+                handleClose={handleDeletePrompt}
+                deleteTarget={deleteTarget}
+                refreshData={refreshData}
+            />
         </div>
     );
 }

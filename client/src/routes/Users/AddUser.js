@@ -23,20 +23,27 @@ export default function AddUser(props) {
     const [passwordConf, setPasswordConf] = useState('');
 
     useEffect(() => {
+        setUsername('');
+        setRole('');
+        setPassword('');
+        setPasswordConf('');
+    }, [props.open]);
+
+    useEffect(() => {
         getRoles().then((response) => {
             console.log(response);
             setRoles(response);
         });
     }, []);
 
-    async function handleAddUser() {
-        if (!username || !role || !password || !passwordConf) console.log('Set all boxes');
+    async function handleAdd() {
+        if (!username || !role || !password || !passwordConf)
+            console.log('Set all boxes');
         else if (password != passwordConf) console.log('Passwords dont match');
         else {
             const passHash = await hashPass(password);
-            console.log(passHash);
             addUser(username, role, passHash).then(() => {
-                props.refreshUsers();
+                props.refreshData();
                 props.handleClose();
             });
         }
@@ -45,7 +52,10 @@ export default function AddUser(props) {
     return (
         <ThemeProvider theme={darkTheme}>
             <Backdrop
-                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                sx={{
+                    color: '#fff',
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
+                }}
                 open={props.open}
                 onClick={props.handleClose}
             >
@@ -67,12 +77,20 @@ export default function AddUser(props) {
                         spacing={2}
                     >
                         <Grid item xs={12} sx={{ pb: 2 }}>
-                            <Typography variant='h4' component='div' align='center'>
+                            <Typography
+                                variant='h4'
+                                component='div'
+                                align='center'
+                            >
                                 Add new user
                             </Typography>
                         </Grid>
                         <Grid item xs={6}>
-                            <Typography variant='h5' component='div' align='center'>
+                            <Typography
+                                variant='h5'
+                                component='div'
+                                align='center'
+                            >
                                 Username
                             </Typography>
                         </Grid>
@@ -95,7 +113,11 @@ export default function AddUser(props) {
                             />
                         </Grid>
                         <Grid item xs={6}>
-                            <Typography variant='h5' component='div' align='center'>
+                            <Typography
+                                variant='h5'
+                                component='div'
+                                align='center'
+                            >
                                 Role
                             </Typography>
                         </Grid>
@@ -109,7 +131,9 @@ export default function AddUser(props) {
                             }}
                         >
                             <FormControl sx={{ width: '60%' }}>
-                                <InputLabel id='select-role-label'>Select role</InputLabel>
+                                <InputLabel id='select-role-label'>
+                                    Select role
+                                </InputLabel>
                                 <Select
                                     labelId='select-role-label'
                                     label='Select role'
@@ -119,7 +143,10 @@ export default function AddUser(props) {
                                     }}
                                 >
                                     {roles.map((role) => (
-                                        <MenuItem key={role.role_id} value={role.role_id}>
+                                        <MenuItem
+                                            key={role.role_id}
+                                            value={role.role_id}
+                                        >
                                             {role.role}
                                         </MenuItem>
                                     ))}
@@ -127,7 +154,11 @@ export default function AddUser(props) {
                             </FormControl>
                         </Grid>
                         <Grid item xs={6}>
-                            <Typography variant='h5' component='div' align='center'>
+                            <Typography
+                                variant='h5'
+                                component='div'
+                                align='center'
+                            >
                                 Password
                             </Typography>
                         </Grid>
@@ -144,13 +175,18 @@ export default function AddUser(props) {
                                 variant='outlined'
                                 type='password'
                                 label='Enter password'
+                                value={password}
                                 onChange={(e) => {
                                     setPassword(e.target.value);
                                 }}
                             />
                         </Grid>
                         <Grid item xs={6}>
-                            <Typography variant='h5' component='div' align='center'>
+                            <Typography
+                                variant='h5'
+                                component='div'
+                                align='center'
+                            >
                                 Verify password
                             </Typography>
                         </Grid>
@@ -167,6 +203,7 @@ export default function AddUser(props) {
                                 variant='outlined'
                                 type='password'
                                 label='Enter password'
+                                value={passwordConf}
                                 onChange={(e) => {
                                     setPasswordConf(e.target.value);
                                 }}
@@ -186,7 +223,7 @@ export default function AddUser(props) {
                                 variant='contained'
                                 size='large'
                                 onClick={() => {
-                                    handleAddUser();
+                                    handleAdd();
                                 }}
                             >
                                 Add user

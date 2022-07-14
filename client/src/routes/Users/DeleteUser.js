@@ -10,17 +10,23 @@ const darkTheme = createTheme({ palette: { mode: 'dark' } });
 
 export default function DeleteUser(props) {
     const handleDelete = async () => {
-        await deleteUser(props.user);
-        props.refreshUsers();
+        await deleteUser(props.deleteTarget);
+        props.refreshData();
         props.handleClose();
     };
 
     return (
         <ThemeProvider theme={darkTheme}>
             <Dialog open={props.open} onClose={props.handleClose}>
-                <DialogTitle
-                    sx={{ fontSize: 40, textAlign: 'center' }}
-                >{`Are you sure you want to delete user ${props.user}?`}</DialogTitle>
+                <DialogTitle sx={{ fontSize: 40, textAlign: 'center' }}>
+                    <p>
+                        Delete{' '}
+                        <span style={{ fontWeight: 'bold' }}>
+                            {props.deleteTarget}
+                        </span>
+                        ?
+                    </p>
+                </DialogTitle>
                 <DialogActions
                     sx={{
                         display: 'grid',
@@ -29,11 +35,15 @@ export default function DeleteUser(props) {
                         gridAutoFlow: 'column',
                     }}
                 >
-                    <Button sx={{ fontSize: 30 }} onClick={props.handleClose} autoFocus>
-                        No
-                    </Button>
                     <Button sx={{ fontSize: 30 }} onClick={handleDelete}>
                         Yes
+                    </Button>
+                    <Button
+                        sx={{ fontSize: 30 }}
+                        onClick={props.handleClose}
+                        autoFocus
+                    >
+                        No
                     </Button>
                 </DialogActions>
             </Dialog>
