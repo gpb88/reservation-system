@@ -1,33 +1,38 @@
-import { getUser, getToken } from 'API';
+import { getUserByName, getToken } from 'API';
 import { verifyPass } from 'services/password';
 
-export async function handleLogin(user) {
-    let isUserValid = false;
-    let db_user = '';
-    try {
-        db_user = await getUser(user.username);
-    } catch {
-        // handle error
+export async function handleLogin(userToCheck, rememberMe) {
+    let authenticated = false;
+    let userFromDB = await getUserByName(userToCheck.username)
+        .then((response) => {
+            return response;
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+
+    if (userFromDB) {
+        authenticated = await verifyPass(
+            userToCheck.password,
+            userFromDB.u_password
+        );
     }
 
-    console.log(user);
-    if (db_user != undefined) {
-        let isPassValid = await verifyPass(user.password, db_user.u_password);
-
-        if (isPassValid) {
-            await getToken(user).then((response) => {
-                localStorage.setItem(
-                    'token',
-                    JSON.stringify(response.data.token)
-                );
-                isUserValid = true;
+    if (authenticated) {
+        await getToken(userToCheck)
+            .then((token) => {
+                if (rememberMe) {
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('user', userToCheck.username);
+                } else {
+                    sessionStorage.setItem('token', token);
+                    sessionStorage.setItem('user', userToCheck.username);
+                }
+            })
+            .catch((err) => {
+                console.error(err);
             });
-        }
     }
 
-    return isUserValid;
-}
-
-export function deleteToken() {
-    localStorage.removeItem('token');
+    return authenticated;
 }

@@ -1,10 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { getPermisions, addPermission, revokePermission } = require('services/dbController');
+const {
+    getPermisions,
+    addPermission,
+    revokePermission,
+} = require('services/dbController');
 
 router.get('/', async function (req, res) {
     try {
         const { userID } = req.query;
+
         const permissions = await getPermisions(userID);
 
         res.status(200).send({ message: 'Success', permissions: permissions });
@@ -28,7 +33,9 @@ router.post('/', function (req, res) {
         });
 
         Promise.all(promises)
-            .then(() => res.status(200).send({ message: 'Permissions updated' }))
+            .then(() =>
+                res.status(200).send({ message: 'Permissions updated' })
+            )
             .catch((error) => {
                 console.log(error);
                 res.status(400).send({ message: 'Something went wrong' });

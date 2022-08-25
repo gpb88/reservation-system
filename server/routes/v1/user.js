@@ -1,21 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const { getUser, addUser, deleteUser } = require('services/dbController');
+const {
+    getUserByName,
+    getUserByID,
+    getUsers,
+    addUser,
+    deleteUser,
+} = require('services/dbController');
 
 router.get('/', async function (req, res) {
     try {
-        const { username } = req.query;
+        const { userID, username } = req.query;
 
         // * Validate user input
-        if (!username) {
-            console.log('No username');
+        if (!username && !userID) {
+            console.log('No username or ID');
             return res.status(200).send({ message: 'No username' });
         }
 
-        const user = await getUser(username);
+        let user = null;
+        if (userID) user = await getUserByID(userID);
+        else user = await getUserByName(username);
 
         // * User not found
-        if (user == false) {
+        if (user == false || user == null) {
             console.log('User not found');
             return res.status(200).send({ message: 'User not found' });
         }
@@ -24,6 +32,17 @@ router.get('/', async function (req, res) {
     } catch (error) {
         console.log(error);
         return res.status(200).send({ message: 'Unknown error occured' });
+    }
+});
+
+router.get('/all', async function (req, res) {
+    try {
+        const users = await getUsers();
+
+        res.status(200).send({ message: 'Success', users: users });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: 'Unknown error occured' });
     }
 });
 
@@ -46,7 +65,9 @@ router.post('/', async function (req, res) {
                 return res.status(200).send({ message: 'User added' });
             } catch (error) {
                 console.log(error);
-                return res.status(200).send({ message: 'Something went wrong' });
+                return res
+                    .status(200)
+                    .send({ message: 'Something went wrong' });
             }
         }
 
@@ -69,7 +90,7 @@ router.delete('/', async function (req, res) {
 
         await deleteUser(username);
 
-        return res.status(200).send({ message: 'Success'});
+        return res.status(200).send({ message: 'Success' });
     } catch (error) {
         console.log(error);
         return res.status(200).send({ message: 'Unknown error occured' });

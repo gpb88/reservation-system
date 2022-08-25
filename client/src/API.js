@@ -5,11 +5,24 @@ const version = 'v1';
 const baseUrl = 'http://127.0.0.1:8080/' + version;
 updateHeader(axios);
 
-export async function getUser(username) {
+export async function getUserByName(username) {
     const result = await axios
         .get(baseUrl + '/user', { params: { username: username } })
         .then(function (response) {
-            console.log(response.config.url, response);
+            return response.data.user;
+        })
+        .catch(function (error) {
+            console.error(error);
+            return error.response;
+        });
+
+    return result;
+}
+
+export async function getUserByID(userID) {
+    const result = await axios
+        .get(baseUrl + '/user', { params: { userID: userID } })
+        .then(function (response) {
             return response.data.user;
         })
         .catch(function (error) {
@@ -26,7 +39,6 @@ export async function validateToken(token) {
             token: token,
         })
         .then(function (response) {
-            console.log(response.config.url, response);
             return response;
         })
         .catch(function (error) {
@@ -42,8 +54,7 @@ export async function getToken(user) {
             params: { username: user.username, role: user.role },
         })
         .then(function (response) {
-            console.log(response.config.url, response);
-            return response;
+            return response.data.token;
         })
         .catch(function (error) {
             console.error(error);
@@ -56,7 +67,6 @@ export async function getRoles() {
     const result = await axios
         .get(baseUrl + '/roles')
         .then(function (response) {
-            console.log(response.config.url, response);
             return response.data.roles;
         })
         .catch(function (error) {
@@ -68,12 +78,11 @@ export async function getRoles() {
 
 export async function addMachine(name, description) {
     const result = await axios
-        .post(baseUrl + '/machines', {
+        .post(baseUrl + '/machine', {
             name: name,
             description: description,
         })
         .then(function (response) {
-            console.log(response.config.url, response);
             return response.data;
         })
         .catch(function (error) {
@@ -85,10 +94,22 @@ export async function addMachine(name, description) {
 
 export async function getMachines() {
     const result = await axios
-        .get(baseUrl + '/machines')
+        .get(baseUrl + '/machine/all')
         .then(function (response) {
-            console.log(response.config.url, response);
             return response.data.machines;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function getMachine(machineID) {
+    const result = await axios
+        .get(baseUrl + '/machine', { params: { machineID: machineID } })
+        .then(function (response) {
+            return response.data.machine;
         })
         .catch(function (error) {
             console.error(error);
@@ -99,9 +120,8 @@ export async function getMachines() {
 
 export async function deleteMachine(name) {
     const result = await axios
-        .delete(baseUrl + '/machines', { data: { name: name } })
+        .delete(baseUrl + '/machine', { data: { name: name } })
         .then(function (response) {
-            console.log(response.config.url, response);
             return response.data;
         })
         .catch(function (error) {
@@ -113,9 +133,8 @@ export async function deleteMachine(name) {
 
 export async function getUsers() {
     const result = await axios
-        .get(baseUrl + '/users')
+        .get(baseUrl + '/user/all')
         .then(function (response) {
-            console.log(response.config.url, response);
             return response.data.users;
         })
         .catch(function (error) {
@@ -129,7 +148,6 @@ export async function getPermissions(userID) {
     const result = await axios
         .get(baseUrl + '/permissions', { params: { userID: userID } })
         .then(function (response) {
-            console.log(response.config.url, response);
             return response.data.permissions;
         })
         .catch(function (error) {
@@ -147,7 +165,6 @@ export async function addUser(username, role, password) {
             password: password,
         })
         .then(function (response) {
-            console.log(response.config.url, response);
             return response.data;
         })
         .catch(function (error) {
@@ -163,7 +180,6 @@ export async function deleteUser(username) {
             data: { username: username },
         })
         .then(function (response) {
-            console.log(response.config.url, response);
             return response.data;
         })
         .catch(function (error) {
@@ -180,7 +196,6 @@ export async function updatePermissions(userID, permissions) {
             permissions: JSON.stringify(permissions),
         })
         .then(function (response) {
-            console.log(response.config.url, response);
             return response.data;
         })
         .catch(function (error) {
@@ -192,9 +207,8 @@ export async function updatePermissions(userID, permissions) {
 
 export async function getClasses() {
     const result = await axios
-        .get(baseUrl + '/classes')
+        .get(baseUrl + '/class/all')
         .then(function (response) {
-            console.log(response.config.url, response);
             return response.data.classes;
         })
         .catch(function (error) {
@@ -204,16 +218,44 @@ export async function getClasses() {
     return result;
 }
 
-export async function addClass(userID, title, startTime, endTime) {
+export async function addClass(userID, title, startTime, endTime, machineID) {
     const result = await axios
-        .post(baseUrl + '/classes', {
+        .post(baseUrl + '/class', {
             userID: userID,
             title: title,
             startTime: startTime,
             endTime: endTime,
+            machineID: machineID,
         })
         .then(function (response) {
-            console.log(response.config.url, response);
+            return response.data;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function deleteClass(classID) {
+    const result = await axios
+        .delete(baseUrl + '/class', { data: { classID: classID } })
+        .then(function (response) {
+            return response.data.class;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function uploadToGoogleCalendar(events) {
+    const result = await axios
+        .post(baseUrl + '/calendar', {
+            events: events,
+        })
+        .then(function (response) {
             return response.data;
         })
         .catch(function (error) {

@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { getClasses, addClass } = require('services/dbController');
+const { getClasses, addClass, deleteClass } = require('services/dbController');
 
-router.get('/', async function (req, res) {
+router.get('/all', async function (req, res) {
     try {
         const classes = await getClasses();
 
@@ -15,8 +15,8 @@ router.get('/', async function (req, res) {
 
 router.post('/', async function (req, res) {
     try {
-        let { userID, title, startTime, endTime } = req.body;
-        console.log(userID, title, startTime, endTime);
+        let { userID, title, startTime, endTime, machineID } = req.body;
+
         try {
             function dateRangeOverlaps(a_start, a_end, b_start, b_end) {
                 if (a_start <= b_start && b_start <= a_end) return true;
@@ -42,10 +42,11 @@ router.post('/', async function (req, res) {
                 i++;
             }
 
-            if (datesOverlap) { // ? Shouldn't happen but is safe
+            if (datesOverlap) {
+                // ? Shouldn't happen but is safe
                 return res.status(200).send({ message: 'Class exists' });
             } else {
-                await addClass(userID, title, startTime, endTime);
+                await addClass(userID, title, startTime, endTime, machineID);
                 return res.status(200).send({ message: 'Class added' });
             }
         } catch (error) {
@@ -55,6 +56,27 @@ router.post('/', async function (req, res) {
     } catch (error) {
         console.log(error);
         res.status(500).send({ message: 'Unknown error occured' });
+    }
+});
+
+router.delete('/', async function (req, res) {
+    try {
+        const { classID } = req.body;
+
+        console.log(classID);
+
+        // * Validate user input
+        if (!classID) {
+            console.log('Incomplete data');
+            return res.status(200).send({ message: 'Incomplete data' });
+        }
+
+        await deleteClass(classID);
+
+        return res.status(200).send({ message: 'Success' });
+    } catch (error) {
+        console.log(error);
+        return res.status(200).send({ message: 'Unknown error occured' });
     }
 });
 

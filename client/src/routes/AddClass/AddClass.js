@@ -1,45 +1,33 @@
 import * as React from 'react';
-import TextField from '@mui/material/TextField';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
+import {
+    TextField,
+    Grid,
+    Typography,
+    Button,
+    MenuItem,
+    Container,
+    Select,
+} from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import Button from '@mui/material/Button';
-import { useState } from 'react';
 import 'styles/add-class.css';
-import { getClasses, addClass, getUser } from 'API';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert from '@mui/material/Alert';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-
-const Alert = React.forwardRef(function Alert(props, ref) {
-    return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
-});
-
-const toastDuration = 6000;
+import { getClasses, addClass, getPermissions } from 'API';
+import { useSnackbar } from 'notistack';
 
 export default function AddClass(props) {
-    const [title, setTitle] = useState('My Event');
-    const [startTime, setStartTime] = useState(new Date());
-    const [endTime, setEndTime] = useState(new Date());
-    const [openSuccessAlert, setOpenSuccessAlert] = useState(false);
-    const [openErrorAlert, setOpenErrorAlert] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('Error occurred');
-    const [classes, setClasses] = useState([]);
+    const [title, setTitle] = React.useState('My Event');
+    const [startTime, setStartTime] = React.useState(new Date());
+    const [endTime, setEndTime] = React.useState(new Date());
+    const [classes, setClasses] = React.useState([]);
     const [machine, setMachine] = React.useState('');
+    const [machines, setMachines] = React.useState([]);
 
-    const handleChangeMachine = (event) => {
-        setMachine(event.target.value);
-    };
-
-    const setDefaultErrorMessage = () => {
-        setErrorMessage('Error occurred');
-    };
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     React.useEffect(() => {
         getClasses().then((response) => {
             let newClasses = [];
+
             response.forEach((_class) => {
                 let newClass = {};
                 newClass.start = new Date(_class.start_time);
@@ -47,82 +35,99 @@ export default function AddClass(props) {
 
                 newClasses.push(newClass);
             });
+
             setClasses(newClasses);
-            console.log(newClasses);
+        });
+
+        getPermissions(props.user.user_id).then((response) => {
+            setMachines(response);
         });
     }, []);
 
-    const handleAddClass = async () => {
-        let userID = await getUser(props.user);
+    const handleChangeMachine = (event) => {
+        setMachine(event.target.value);
+    };
 
+    const handleAddClass = async () => {
         // ? Data validation
         if (new Date(startTime).getTime() > new Date(endTime).getTime()) {
-            setErrorMessage("End time can't precede start time!");
-            setOpenErrorAlert(true);
-            setTimeout(() => {
-                setDefaultErrorMessage();
-                setOpenErrorAlert(false);
-            }, toastDuration);
+            return enqueueSnackbar("End time can't precede start time!", {
+                variant: 'error',
+            });
         } else if (
             new Date(startTime).getTime() == new Date(endTime).getTime()
         ) {
-            setErrorMessage("Start time can't be same as end time!");
-            setOpenErrorAlert(true);
-            setTimeout(() => {
-                setDefaultErrorMessage();
-                setOpenErrorAlert(false);
-            }, toastDuration);
-        } else {
-            addClass(userID.user_id, title, startTime, endTime)
-                .then(() => {
-                    setOpenSuccessAlert(true);
-                    setTimeout(() => setOpenSuccessAlert(false), toastDuration);
-                })
-                .catch(() => {
-                    setOpenErrorAlert(true);
-                    setTimeout(() => setOpenErrorAlert(false), toastDuration);
-                });
+            return enqueueSnackbar("Start time can't be same as end time!", {
+                variant: 'error',
+            });
         }
+
+        addClass(
+            props.user.user_id,
+            title,
+            new Date(startTime),
+            new Date(endTime),
+            machine
+        )
+            .then(() => {
+                return enqueueSnackbar('Class successfully added', {
+                    variant: 'success',
+                });
+            })
+            .catch(() => {
+                return enqueueSnackbar('Error occured', {
+                    variant: 'error',
+                });
+            });
     };
 
     const filterStartDate = (time) => {
         let isAvailable = true;
+        const dateFromPicker = new Date(time);
+
+        // ? Check if dates are already reseved
         classes.forEach((_class) => {
-            const currentDate = new Date(time);
-            const classStart = new Date(_class.start);
-            const classEnd = new Date(_class.end);
+            const classStartDate = new Date(_class.start);
+            const classEndDate = new Date(_class.end);
 
             if (
-                classStart.getTime() <= currentDate.getTime() &&
-                classEnd.getTime() >= currentDate.getTime()
+                classStartDate.getTime() <= dateFromPicker.getTime() &&
+                classEndDate.getTime() >= dateFromPicker.getTime()
             ) {
                 isAvailable = false;
             }
         });
+
+        // ? Exclude time already passed in current day
+        const today = new Date();
+
+        if (
+            dateFromPicker.getDay() == today.getDay() &&
+            dateFromPicker.getMonth() == today.getMonth() &&
+            dateFromPicker.getYear() == today.getYear() &&
+            dateFromPicker.getTime() <= today.getTime()
+        )
+            isAvailable = false;
 
         return isAvailable;
     };
 
     const filterEndDate = (time) => {
         let isAvailable = true;
+        const dateFromPicker = new Date(time);
+
+        // ? Check if dates are already reseved
         classes.forEach((_class) => {
-            const currentDate = new Date(time);
             const classStart = new Date(_class.start);
             const classEnd = new Date(_class.end);
 
             if (
-                classStart.getTime() <= currentDate.getTime() &&
-                classEnd.getTime() >= currentDate.getTime()
+                classStart.getTime() <= dateFromPicker.getTime() &&
+                classEnd.getTime() >= dateFromPicker.getTime()
             ) {
                 isAvailable = false;
             }
         });
-
-        const currentDate = new Date(time);
-        const selectedDate = new Date(startTime);
-
-        if (currentDate.getTime() <= selectedDate.getTime())
-            isAvailable = false;
 
         return isAvailable;
     };
@@ -135,121 +140,158 @@ export default function AddClass(props) {
     }
 
     return (
-        <div className='add-class'>
-            {classes.length == 0 ? null : (
+        <Container className='add-class'>
+            <Grid
+                container
+                sx={{
+                    display: 'flex',
+                    justifyItems: 'center',
+                    alignItems: 'center',
+
+                    p: 2,
+                }}
+                spacing={2}
+            >
+                <Grid item xs={12} sx={{ mt: 6, mb: 4 }}>
+                    <Typography variant='h4' align='center'>
+                        Add class
+                    </Typography>
+                </Grid>
+
                 <Grid
-                    container
+                    item
+                    xs={12}
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <Typography
+                        sx={{ width: '60%', textAlign: 'left' }}
+                        variant='h6'
+                        align='center'
+                    >
+                        Title
+                    </Typography>
+                </Grid>
+
+                <Grid
+                    item
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                    xs={12}
+                >
+                    <TextField
+                        variant='outlined'
+                        label='Enter title'
+                        value={title}
+                        multiline
+                        rows={5}
+                        sx={{ width: '60%' }}
+                        onChange={(e) => {
+                            setTitle(e.target.value);
+                        }}
+                    />
+                </Grid>
+
+                <Grid
+                    item
+                    xs={12}
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <Typography
+                        sx={{ width: '60%', textAlign: 'left' }}
+                        variant='h6'
+                    >
+                        Start time
+                    </Typography>
+                </Grid>
+
+                <Grid
+                    item
                     sx={{
                         display: 'flex',
                         justifyItems: 'center',
-                        alignItems: 'center',
-                        p: 2,
                     }}
-                    spacing={2}
+                    xs={12}
                 >
-                    <Grid item xs={12} sx={{ pb: 4 }}>
-                        <Typography variant='h3' component='div' align='center'>
-                            Add class
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={3}>
-                        <Typography variant='h5' component='div' align='center'>
-                            Title
-                        </Typography>
-                    </Grid>
-                    <Grid
-                        item
+                    <Container
                         sx={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
+                            width: '60%',
                         }}
-                        xs={9}
+                        disableGutters={true}
                     >
-                        <TextField
-                            variant='outlined'
-                            label='Enter title'
-                            value={title}
-                            multiline
-                            rows={5}
-                            sx={{ width: '300px' }}
-                            onChange={(e) => {
-                                setTitle(e.target.value);
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xs={3}>
-                        <Typography variant='h5' component='div' align='center'>
-                            Start time
-                        </Typography>
-                    </Grid>
-                    <Grid
-                        item
-                        sx={{
-                            display: 'flex',
-                            justifyItems: 'center',
-                            alignItems: 'center',
-                            flexDirection: 'column',
-                        }}
-                        xs={9}
-                    >
-                        <Grid
-                            sx={{
-                                display: 'flex',
-                                justifyItems: 'center',
-                                alignItems: 'center',
-                                marginBottom: '20px',
-                            }}
-                        >
-                            <DatePicker
-                                disabled
-                                selected={startTime}
-                                dateFormat='MM/dd/yyyy h:mm aa'
-                            />
-                        </Grid>
                         <DatePicker
+                            className='add-class-datepicker'
                             showTimeSelect
+														popperPlacement="right"
+                            timeFormat='HH:mm'
+                            dateFormat='MMMM d yyyy, HH:mm'
                             selected={startTime}
-                            onChange={(date) => setStartTime(date)}
-                            inline
+                            onChange={(date) => {
+                                setStartTime(date);
+                            }}
+                            excludeDateIntervals={[
+                                // ? Exclude dates before today
+                                {
+                                    start: new Date('1970-01-01'),
+                                    end: new Date().setTime(
+                                        new Date().getTime() -
+                                            24 * 60 * 60 * 1000
+                                    ),
+                                },
+                            ]}
                             filterTime={filterStartDate}
                         />
-                    </Grid>
-                    <Grid item xs={3}>
-                        <Typography variant='h5' component='div' align='center'>
-                            End time
-                        </Typography>
-                    </Grid>
-                    <Grid
-                        item
-                        sx={{
-                            display: 'flex',
-                            justifyItems: 'center',
-                            alignItems: 'center',
-                            flexDirection: 'column',
-                        }}
-                        xs={9}
+                    </Container>
+                </Grid>
+
+                <Grid
+                    item
+                    xs={12}
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <Typography
+                        sx={{ width: '60%', textAlign: 'left' }}
+                        variant='h6'
                     >
-                        <Grid
-                            sx={{
-                                display: 'flex',
-                                justifyItems: 'center',
-                                alignItems: 'center',
-                                marginBottom: '20px',
-                            }}
-                        >
-                            <DatePicker
-                                disabled
-                                selected={endTime}
-                                dateFormat='MM/dd/yyyy h:mm aa'
-                            />
-                        </Grid>
+                        End time
+                    </Typography>
+                </Grid>
+
+                <Grid
+                    item
+                    sx={{
+                        display: 'flex',
+                        justifyItems: 'center',
+                    }}
+                    xs={12}
+                >
+                    <Container
+                        sx={{
+                            width: '60%',
+                        }}
+                        disableGutters={true}
+                    >
                         <DatePicker
+                            className='add-class-datepicker'
                             showTimeSelect
+                            timeFormat='HH:mm'
+														popperPlacement="right"
+                            dateFormat='MMMM d yyyy, HH:mm'
                             selected={endTime}
                             onChange={(date) => setEndTime(date)}
-                            inline
                             excludeDateIntervals={[
+                                // ? Exclude dates before start date
                                 {
                                     start: new Date('1970-01-01'),
                                     end: new Date().setTime(
@@ -260,64 +302,79 @@ export default function AddClass(props) {
                             ]}
                             filterTime={filterEndDate}
                         />
-                    </Grid>
-                    <Grid item xs={3}>
-                        <Typography variant='h5' component='div' align='center'>
-                            Machine
-                        </Typography>
-                    </Grid>
-                    <Grid
-                        item
+                    </Container>
+                </Grid>
+
+                <Grid
+                    item
+                    xs={12}
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <Typography
+                        sx={{ width: '60%', textAlign: 'left' }}
+                        variant='h6'
+                    >
+                        Machine
+                    </Typography>
+                </Grid>
+
+                <Grid
+                    item
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}
+                    xs={12}
+                >
+                    <Container
                         sx={{
-                            display: 'flex',
-                            justifyContent: 'center',
+                            width: '60%',
                         }}
-                        xs={9}
+                        disableGutters={true}
                     >
                         <Select
                             value={machine}
                             label='Machine'
                             onChange={handleChangeMachine}
-                            sx={{ width: '80%' }}
+                            sx={{ width: '100%' }}
                         >
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
+                            {machines.map((machine, index) => (
+                                <MenuItem
+                                    key={index}
+                                    value={machine.machine_id}
+                                >
+                                    {machine.machine_name}
+                                </MenuItem>
+                            ))}
                         </Select>
-                    </Grid>
-                    <Grid
-                        xs={12}
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Button
-                            variant='contained'
-                            sx={{
-                                fontSize: '25px',
-                                margin: '20px',
-                                width: '300px',
-                            }}
-                            onClick={handleAddClass}
-                        >
-                            Add
-                        </Button>
-                    </Grid>
+                    </Container>
                 </Grid>
-            )}
-
-            <Snackbar open={openSuccessAlert} autoHideDuration={1000}>
-                <Alert severity='success' sx={{ width: '100%' }}>
-                    Entry has been added!
-                </Alert>
-            </Snackbar>
-            <Snackbar open={openErrorAlert} autoHideDuration={1000}>
-                <Alert severity='error' sx={{ width: '100%' }}>
-                    {errorMessage}
-                </Alert>
-            </Snackbar>
-        </div>
+								
+                <Grid
+                    item
+                    xs={12}
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Button
+                        variant='contained'
+                        sx={{
+                            fontSize: '25px',
+                            margin: '20px',
+                            width: '300px',
+                        }}
+                        onClick={handleAddClass}
+                    >
+                        Submit
+                    </Button>
+                </Grid>
+            </Grid>
+        </Container>
     );
 }

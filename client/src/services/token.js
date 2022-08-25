@@ -4,9 +4,12 @@ export async function checkToken() {
     // ? Check if user is already logged in (has valid token)
     // ? if so, redirect to home
     let isValid = false;
-    let jwtToken = localStorage.getItem('token');
-    if (jwtToken && jwtToken !== 'undefined') {
-        await validateToken(JSON.parse(jwtToken))
+    let jwtToken = getToken();
+
+    console.log(jwtToken);
+
+    if (jwtToken) {
+        await validateToken(jwtToken)
             .then((response) => {
                 if (response.status === 200) isValid = true;
             })
@@ -16,4 +19,16 @@ export async function checkToken() {
     }
 
     return isValid;
+}
+
+export function getToken() {
+    let jwtToken = localStorage.getItem('token');
+    if (jwtToken == null) jwtToken = sessionStorage.getItem('token');
+
+    return jwtToken;
+}
+
+export function clearStorage() {
+    localStorage.clear();
+    sessionStorage.clear();
 }

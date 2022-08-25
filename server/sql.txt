@@ -7,7 +7,7 @@ CREATE TABLE users (
   user_id serial PRIMARY KEY
 , username varchar(128) NOT NULL
 , u_role int NOT NULL DEFAULT 1 REFERENCES roles (role_id) ON UPDATE CASCADE
-, u_password varchar(70) NOT NULL
+, u_password varchar(70)
 );
 
 CREATE TABLE machines (
@@ -26,6 +26,7 @@ CREATE TABLE classes (
   class_id serial PRIMARY KEY
 , user_id int REFERENCES users (user_id) ON UPDATE CASCADE ON DELETE CASCADE
 , title varchar(150) NOT NULL
-, start_time varchar(100) NOT NULL
-, end_time varchar(100) NOT NULL
+, start_time TIMESTAMPTZ NOT NULL
+, end_time TIMESTAMPTZ NOT NULL
+, machine_id int REFERENCES machines (machine_id)
 );

@@ -9,6 +9,25 @@ const {
 
 router.get('/', async function (req, res) {
     try {
+        const { machineID } = req.query;
+
+        const machine = await getMachine(machineID);
+
+        // * Machine not found
+        if (machine == false || machine == null) {
+            console.log('Machine not found');
+            return res.status(200).send({ message: 'Machine not found' });
+        }
+
+        res.status(200).send({ message: 'Success', machine: machine });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: 'Unknown error occured' });
+    }
+});
+
+router.get('/all', async function (req, res) {
+    try {
         const machines = await getMachines();
 
         res.status(200).send({ message: 'Success', machines: machines });

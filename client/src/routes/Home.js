@@ -1,35 +1,57 @@
 import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import Button from '@mui/material/Button';
+import {
+    AppBar,
+    Box,
+    Toolbar,
+    Typography,
+    Container,
+    Button,
+} from '@mui/material';
 import Users from 'routes/Users/Users';
 import Timetable from 'routes/Timetable/Timetable';
 import AddClass from 'routes/AddClass/AddClass';
 import Machines from 'routes/Machines/Machines';
 import PermissionPage from 'routes/PermissionPage/PermissionPage';
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { deleteToken } from 'services/handleLogin';
+import { clearStorage, getToken } from 'services/token';
+import { getUserByName } from 'API';
 
 export default function Home() {
-    let navigate = useNavigate();
-    const { state } = useLocation();
-    let [pageComponent, setPageComponent] = React.useState(<Timetable />);
-    const pages =
-        state.userRole == 'admin'
-            ? ['Timetable', 'Add class', 'Users', 'Machines', 'Permissions']
-            : ['Timetable', 'Add class'];
+    let [pages, setPages] = React.useState([]);
+    let [user, setUser] = React.useState('');
 
-    useEffect(() => {
-        console.log(state);
+    let [pageComponent, setPageComponent] = React.useState(<Timetable />);
+
+    let navigate = useNavigate();
+
+    React.useEffect(async () => {
+        let token = getToken();
+        if (token) {
+            let username = getUsername();
+            let user = await getUserByName(username);
+            setUser(user);
+
+            user.role == 'admin'
+                ? setPages([
+                      'Timetable',
+                      'Add class',
+                      'Users',
+                      'Machines',
+                      'Permissions',
+                  ])
+                : setPages(['Timetable', 'Add class']);
+        } else logout();
     }, []);
 
+    const getUsername = () => {
+        let username = localStorage.getItem('user');
+        if (username == null) username = sessionStorage.getItem('user');
+
+        return username;
+    };
+
     const logout = () => {
-        deleteToken();
+        clearStorage();
         navigate('/');
     };
 
@@ -45,7 +67,7 @@ export default function Home() {
                 setPageComponent(<Timetable />);
                 break;
             case 'Add class':
-                setPageComponent(<AddClass user={state.user} />);
+                setPageComponent(<AddClass user={user} />);
                 break;
             case 'Machines':
                 setPageComponent(<Machines />);
@@ -57,7 +79,11 @@ export default function Home() {
     };
 
     return (
-        <div id='home'>
+        <Container
+            className='home'
+            maxWidth={false}
+            sx={{ padding: '0 !important' }}
+        >
             <AppBar position='static'>
                 <Container maxWidth='xl'>
                     <Toolbar disableGutters>
@@ -65,14 +91,22 @@ export default function Home() {
                             variant='h5'
                             noWrap
                             component='div'
-                            sx={{ mr: 2, display: { xs: 'none', md: 'flex' } }}
+                            sx={{
+                                mr: 2,
+                                display: { xs: 'none', md: 'flex' },
+                            }}
                         >
-                            LOGO
+                            <img
+                                width='64'
+                                src='/images/logo_agh.png'
+                                alt='logo'
+                            />
                         </Typography>
                         <Box
                             sx={{
+                                ml: 8,
                                 flexGrow: 1,
-                                display: { xs: 'none', md: 'flex' },
+                                display: { md: 'flex' },
                             }}
                         >
                             {pages.map((page) => (
@@ -80,9 +114,10 @@ export default function Home() {
                                     key={page}
                                     onClick={() => switchPage(page)}
                                     sx={{
-                                        my: 2,
                                         color: 'white',
-                                        display: 'block',
+                                        textTransform: 'none !important',
+                                        fontSize: '1.3rem',
+                                        ml: 2,
                                     }}
                                 >
                                     {page}
@@ -92,17 +127,23 @@ export default function Home() {
                         <Button
                             onClick={() => logout()}
                             sx={{
-                                my: 2,
                                 color: 'white',
                                 display: 'block',
+                                textTransform: 'none',
+                                backgroundColor: '#fff',
+                                color: '#000',
+                                '&:hover': {
+                                    backgroundColor: '#fff',
+                                    textDecoration: 'underline',
+                                },
                             }}
                         >
-                            LOGOUT
+                            Log out
                         </Button>
                     </Toolbar>
                 </Container>
             </AppBar>
             {pageComponent}
-        </div>
+        </Container>
     );
 }

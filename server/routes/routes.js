@@ -1,19 +1,19 @@
 const token = require('routes/v1/token');
 const user = require('routes/v1/user');
-const users = require('routes/v1/users');
 const roles = require('routes/v1/roles');
-const machines = require('routes/v1/machines');
+const machine = require('routes/v1/machine');
 const permissions = require('routes/v1/permissions');
-const classes = require('routes/v1/classes');
+const _class = require('routes/v1/class');
+const calendar = require('routes/v1/calendar');
 
 const version = 'v1';
 
 module.exports = function (app) {
     app.use(`/${version}/user`, user);
-    app.use(`/${version}/users`, users);
     app.use(`/${version}/roles`, roles);
     app.use(`/${version}/token`, token);
-    app.use(`/${version}/machines`, machines);
+    app.use(`/${version}/machine`, machine);
     app.use(`/${version}/permissions`, permissions);
-    app.use(`/${version}/classes`, classes);
+    app.use(`/${version}/class`, _class);
+    app.use(`/${version}/calendar`, calendar);
 };

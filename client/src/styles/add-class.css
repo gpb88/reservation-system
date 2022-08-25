@@ -1,13 +1,24 @@
 .add-class {
-	width: 40%;
+	width: 40% !important;
 	margin: 0 auto;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
-.description{
+.description {
 	border-radius: 5px;
 	border-color: rgba(0, 0, 0, 0.23);
 	padding: 5px;
+}
+
+.add-class .add-class-datepicker {
+	font-size: 25px;
+	font-family: Verdana;
+	border-radius: 5px;
+	box-shadow: none;
+	width: 100%;
+	text-align: center;
+	border: 1px solid #c4c4c4;
+	padding: 5px 0;
 }

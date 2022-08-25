@@ -1,10 +1,14 @@
+import { getToken } from 'services/token';
+
 export function updateHeader(axios) {
     axios.interceptors.request.use(
         (req) => {
-            if (!req.url.includes('user') && req.method !== 'get') {
-                const jwtToken = JSON.parse(localStorage.getItem('token'));
+            if (req.method !== 'get') {
+                const jwtToken = getToken();
+
                 req.headers['authorization'] = jwtToken;
             }
+
             return req;
         },
         (error) => {
