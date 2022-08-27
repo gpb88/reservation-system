@@ -52,11 +52,7 @@ export default function Login() {
                 role: userData.role,
             };
 
-            navigate('/home', {
-                state: {
-                    user: user,
-                },
-            });
+            navigate('/home');
         } else
             return enqueueSnackbar('User not found!', {
                 variant: 'error',

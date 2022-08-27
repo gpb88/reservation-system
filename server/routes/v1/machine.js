@@ -2,16 +2,18 @@ const express = require('express');
 const router = express.Router();
 const {
     getMachines,
-    getMachine,
+    getMachineByName,
+    getMachineByID,
     addMachine,
     deleteMachine,
+    updateMachine,
 } = require('services/dbController');
 
 router.get('/', async function (req, res) {
     try {
         const { machineID } = req.query;
 
-        const machine = await getMachine(machineID);
+        const machine = await getMachineByID(machineID);
 
         // * Machine not found
         if (machine == false || machine == null) {
@@ -37,6 +39,29 @@ router.get('/all', async function (req, res) {
     }
 });
 
+router.put('/', async function (req, res) {
+    try {
+        const { machineID, name, description } = req.body;
+
+        // * Validate user input
+        if (!machineID || !name) {
+            console.log('Incomplete data');
+            return res.status(400).send({ message: 'Incomplete data' });
+        }
+
+        try {
+            await updateMachine(machineID, name, description);
+            return res.status(200).send({ message: 'Machine updated' });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ message: 'Something went wrong' });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ message: 'Unknown error occured' });
+    }
+});
+
 router.post('/', async function (req, res) {
     try {
         const { name, description } = req.body;
@@ -44,20 +69,20 @@ router.post('/', async function (req, res) {
         // * Validate user input
         if (!name) {
             console.log('Incomplete data');
-            return res.status(200).send({ message: 'Incomplete data' });
+            return res.status(400).send({ message: 'Incomplete data' });
         }
 
-        const machine = await getMachine(name);
+        const machine = await getMachineByName(name);
 
         // * User not found => can be added
-        if (machine == false) {
+        if (machine == false || machine == null) {
             try {
                 await addMachine(name, description);
                 return res.status(200).send({ message: 'Machine added' });
             } catch (error) {
                 console.log(error);
                 return res
-                    .status(200)
+                    .status(500)
                     .send({ message: 'Something went wrong' });
             }
         }
@@ -71,17 +96,21 @@ router.post('/', async function (req, res) {
 
 router.delete('/', async function (req, res) {
     try {
-        const { name } = req.body;
+        const { machineID } = req.body;
 
         // * Validate user input
-        if (!name) {
+        if (!machineID) {
             console.log('Incomplete data');
             return res.status(200).send({ message: 'Incomplete data' });
         }
 
-        await deleteMachine(name);
-
-        return res.status(200).send({ message: 'Success' });
+        try {
+            await deleteMachine(machineID);
+            return res.status(200).send({ message: 'Machine added' });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ message: 'Something went wrong' });
+        }
     } catch (error) {
         console.log(error);
         return res.status(200).send({ message: 'Unknown error occured' });

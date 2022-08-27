@@ -15,7 +15,7 @@ function initDbConn() {
 async function getUserByName(username) {
     const query = {
         text: `
-				SELECT users.user_id, users.username, roles.role, users.u_password 
+				SELECT users.user_id, users.username, roles.role_id, roles.role, users.u_password 
 				FROM users 
 				INNER JOIN roles 
 					ON users.u_role=roles.role_id
@@ -41,7 +41,7 @@ async function getUserByName(username) {
 async function getUserByID(userID) {
     const query = {
         text: `
-				SELECT users.user_id, users.username, roles.role, users.u_password 
+				SELECT users.user_id, users.username, roles.role_id, roles.role, users.u_password 
 				FROM users 
 				INNER JOIN roles 
 					ON users.u_role=roles.role_id
@@ -104,7 +104,7 @@ async function getMachines() {
     return result;
 }
 
-async function getMachine(machineID) {
+async function getMachineByID(machineID) {
     const query = {
         text: `
 				SELECT machine_id, machine_name, description
@@ -128,12 +128,36 @@ async function getMachine(machineID) {
     return result;
 }
 
+async function getMachineByName(machineName) {
+    const query = {
+        text: `
+				SELECT machine_id, machine_name, description
+				FROM machines
+				WHERE machine_name='${machineName}'
+				LIMIT 1`,
+    };
+
+    let result = await client
+        .query(query)
+        .then((res) => {
+            return res.rows;
+        })
+        .catch((e) => {
+            console.error(e.stack);
+            throw e.stack;
+        });
+
+    result.length ? (result = result[0]) : (result = false);
+
+    return result;
+}
+
 async function addMachine(name, description) {
     const query = {
         text: `
-				INSERT INTO machines 
+				INSERT INTO machines
 					(machine_name, description)
-				VALUES 
+				VALUES
 					('${name}', '${description}')`,
     };
 
@@ -150,11 +174,33 @@ async function addMachine(name, description) {
     return result;
 }
 
-async function deleteMachine(name) {
+async function updateMachine(machineID, name, description) {
+    const query = {
+        text: `
+				UPDATE machines
+				SET machine_name='${name}',
+						description='${description}'
+				WHERE machine_id='${machineID}'`,
+    };
+
+    let result = await client
+        .query(query)
+        .then((res) => {
+            return res;
+        })
+        .catch((e) => {
+            console.log(e.stack);
+            throw e.stack;
+        });
+
+    return result;
+}
+
+async function deleteMachine(machineID) {
     const query = {
         text: `
 				DELETE FROM machines
-				WHERE machine_name='${name}'`,
+				WHERE machine_id='${machineID}'`,
     };
 
     let result = await client
@@ -173,7 +219,7 @@ async function deleteMachine(name) {
 async function getUsers() {
     const query = {
         text: `
-				SELECT users.user_id, users.username, roles.role, users.u_password 
+				SELECT users.user_id, users.username, roles.role_id, roles.role, users.u_password 
 				FROM users 
 				INNER JOIN roles 
 					ON users.u_role=roles.role_id 
@@ -221,7 +267,7 @@ async function getPermisions(userID) {
 async function addUser(username, role, password) {
     const query = {
         text: `
-				INSERT INTO users 
+				INSERT INTO users
 					(username, u_role, u_password)
 				VALUES 
 					('${username}', '${role}', '${password}')`,
@@ -240,11 +286,33 @@ async function addUser(username, role, password) {
     return result;
 }
 
-async function deleteUser(username) {
+async function updateUser(userID, username, role) {
+    const query = {
+        text: `
+				UPDATE users
+				SET username='${username}',
+						u_role='${role}'
+				WHERE user_id='${userID}'`,
+    };
+
+    let result = await client
+        .query(query)
+        .then((res) => {
+            return res;
+        })
+        .catch((e) => {
+            console.log(e.stack);
+            throw e.stack;
+        });
+
+    return result;
+}
+
+async function deleteUser(userID) {
     const query = {
         text: `
 				DELETE FROM users
-				WHERE username='${username}'`,
+				WHERE user_id='${userID}'`,
     };
 
     let result = await client
@@ -326,6 +394,27 @@ async function getClasses() {
     return result;
 }
 
+async function getClassesForUser(userID) {
+    const query = {
+        text: `
+				SELECT * 
+				FROM classes
+				where user_id=${userID}`,
+    };
+
+    let result = await client
+        .query(query)
+        .then((res) => {
+            return res.rows;
+        })
+        .catch((e) => {
+            console.error(e.stack);
+            throw e.stack;
+        });
+
+    return result;
+}
+
 async function addClass(userID, title, startTime, endTime, machineID) {
     const query = {
         text: `
@@ -373,9 +462,13 @@ module.exports = {
     initDbConn,
     getUserByName,
     getUserByID,
+    updateUser,
     getRoles,
     getMachines,
-    getMachine,
+    updateMachine,
+    getMachineByName,
+    getMachineByID,
+    getClassesForUser,
     addMachine,
     deleteMachine,
     getUsers,

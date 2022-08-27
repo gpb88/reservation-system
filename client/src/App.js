@@ -1,7 +1,6 @@
 import Login from 'routes/Login';
 import Home from 'routes/Home';
 import { Routes, Route } from 'react-router-dom';
-import { PrivateRoute } from 'services/privateRoute';
 
 export default function App() {
     return (

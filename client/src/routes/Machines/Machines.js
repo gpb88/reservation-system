@@ -1,10 +1,10 @@
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
+import * as React from 'react';
+import { Typography, Button, Container } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import React, { useState, useEffect } from 'react';
 import { getMachines } from 'API';
-import AddMachine from './AddMachine';
-import DeleteMachine from './DeleteMachine';
+import { FaPlus } from 'react-icons/fa';
+import AddMachine from 'routes/Machines/AddMachine';
+import MachineCard from 'routes/Machines/MachineCard';
 
 const columns = [
     { field: 'machine_name', headerName: 'Name', flex: 1, minWidth: 150 },
@@ -12,78 +12,88 @@ const columns = [
 ];
 
 export default function Machines() {
-    const [machines, setMachines] = useState([]);
-    const [isAddWindowOpen, setIsAddWindowOpen] = useState(false);
-    const [isDeletePromptOpen, setIsDeletePromptOpen] = useState(false);
-    const [deleteTarget, setDeleteTarget] = useState('');
+    const [machines, setMachines] = React.useState([]);
+    const [showAddMachineWindow, setShowAddMachineWindow] =
+        React.useState(false);
+    const [showMachineWindow, setShowMachineWindow] = React.useState(false);
+    const [selectedMachine, setSelectedMachine] = React.useState('');
 
-    const handleAddWindow = () => {
-        setIsAddWindowOpen(!isAddWindowOpen);
-    };
-
-    const handleDeletePrompt = () => {
-        setIsDeletePromptOpen(!isDeletePromptOpen);
-    };
+    React.useEffect(() => {
+        refreshData();
+    }, []);
 
     const refreshData = () => {
         getMachines().then((response) => {
-            console.log(response);
             setMachines(response);
         });
     };
 
-    useEffect(() => {
-        refreshData();
-    }, []);
+    const handleRowClick = (machine) => {
+        setSelectedMachine(machine);
+        setShowMachineWindow(true);
+    };
 
     return (
-        <div id='user-page'>
-            <Typography variant='h4' component='h1' sx={{ m: 6 }}>
-                Machine management
+        <Container
+            id='machine-page'
+            maxWidth='sm'
+            disableGutters={true}
+            sx={{ display: 'grid', justifyItems: 'center' }}
+        >
+            <Typography variant='h4' component='h1' sx={{ mt: 6, mb: 4 }}>
+                Machines
             </Typography>
             <Button
                 variant='contained'
-                sx={{ ml: 6, mb: 6, fontSize: '1.3rem' }}
-                onClick={handleAddWindow}
+                sx={{ justifySelf: 'right', mb: 2 }}
+                onClick={() => {
+                    setShowAddMachineWindow(true);
+                }}
             >
-                Add new machine
+                <FaPlus size='2em' />
             </Button>
-            <div style={{ width: '60%' }}>
-                <DataGrid
-                    getRowId={(row) => row.machine_id}
-                    rows={machines}
-                    columns={columns}
-                    pageSize={5}
-                    rowsPerPageOptions={[5]}
-                    sx={{
-                        fontSize: '1.5rem',
-                        ml: 6,
-                        width: '100%',
-                        userSelect: 'none !important',
+            <DataGrid
+                getRowId={(row) => row.machine_id}
+                rows={machines}
+                columns={columns}
+                pageSize={5}
+                rowsPerPageOptions={[5]}
+                sx={{
+                    fontSize: '1.5em',
+                    width: '100%',
+                    userSelect: 'none !important',
+                    padding: 'none !important',
+                }}
+                autoHeight={true}
+                disableSelectionOnClick
+                disableColumnFilter
+                disableColumnMenu
+                disableColumnSelector
+                disableDensitySelector
+                onRowClick={(data) => {
+                    handleRowClick(data.row);
+                }}
+            />
+
+            {showAddMachineWindow ? (
+                <AddMachine
+                    open={showAddMachineWindow}
+                    handleClose={() => {
+                        setShowAddMachineWindow(false);
                     }}
-                    autoHeight={true}
-                    disableSelectionOnClick
-                    disableColumnFilter
-                    disableColumnMenu
-                    disableColumnSelector
-                    disableDensitySelector
-                    onRowDoubleClick={(data) => {
-                        setDeleteTarget(data.row.machine_name);
-                        handleDeletePrompt();
-                    }}
+                    refreshData={refreshData}
                 />
-            </div>
-            <AddMachine
-                open={isAddWindowOpen}
-                handleClose={handleAddWindow}
-                refreshData={refreshData}
-            />
-            <DeleteMachine
-                open={isDeletePromptOpen}
-                handleClose={handleDeletePrompt}
-                deleteTarget={deleteTarget}
-                refreshData={refreshData}
-            />
-        </div>
+            ) : null}
+            {showMachineWindow ? (
+                <MachineCard
+                    open={showMachineWindow}
+                    handleClose={() => {
+                        setShowMachineWindow(false);
+                    }}
+                    refreshData={refreshData}
+                    machine={selectedMachine}
+                />
+            ) : null}
+        </Container>
     );
 }

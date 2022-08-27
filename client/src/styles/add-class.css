@@ -22,3 +22,7 @@
 	border: 1px solid #c4c4c4;
 	padding: 5px 0;
 }
+
+.add-class .add-class-datepicker:hover {
+	border-color: rgba(0, 0, 0, 0.87);
+}

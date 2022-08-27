@@ -1,20 +1,14 @@
 import * as React from 'react';
-import {
-    AppBar,
-    Box,
-    Toolbar,
-    Typography,
-    Container,
-    Button,
-} from '@mui/material';
+import { AppBar, Toolbar, Typography, Container, Button } from '@mui/material';
 import Users from 'routes/Users/Users';
 import Timetable from 'routes/Timetable/Timetable';
 import AddClass from 'routes/AddClass/AddClass';
 import Machines from 'routes/Machines/Machines';
-import PermissionPage from 'routes/PermissionPage/PermissionPage';
+import Permissions from 'routes/Permissions/Permissions';
 import { useNavigate } from 'react-router-dom';
 import { clearStorage, getToken } from 'services/token';
 import { getUserByName } from 'API';
+import { BiLogOut } from 'react-icons/bi';
 
 export default function Home() {
     let [pages, setPages] = React.useState([]);
@@ -58,10 +52,10 @@ export default function Home() {
     const switchPage = (page) => {
         switch (page) {
             case 'Users':
-                setPageComponent(<Users />);
+                setPageComponent(<Users user={user} logout={logout} />);
                 break;
             case 'Permissions':
-                setPageComponent(<PermissionPage />);
+                setPageComponent(<Permissions />);
                 break;
             case 'Timetable':
                 setPageComponent(<Timetable />);
@@ -86,7 +80,7 @@ export default function Home() {
         >
             <AppBar position='static'>
                 <Container maxWidth='xl'>
-                    <Toolbar disableGutters>
+                    <Toolbar disableGutters variant='dense'>
                         <Typography
                             variant='h5'
                             noWrap
@@ -102,11 +96,9 @@ export default function Home() {
                                 alt='logo'
                             />
                         </Typography>
-                        <Box
+                        <Container
                             sx={{
-                                ml: 8,
-                                flexGrow: 1,
-                                display: { md: 'flex' },
+                                ml: 4,
                             }}
                         >
                             {pages.map((page) => (
@@ -116,19 +108,19 @@ export default function Home() {
                                     sx={{
                                         color: 'white',
                                         textTransform: 'none !important',
-                                        fontSize: '1.3rem',
+                                        fontSize: '1.2em',
                                         ml: 2,
                                     }}
                                 >
                                     {page}
                                 </Button>
                             ))}
-                        </Box>
+                        </Container>
                         <Button
                             onClick={() => logout()}
                             sx={{
                                 color: 'white',
-                                display: 'block',
+                                display: 'flex',
                                 textTransform: 'none',
                                 backgroundColor: '#fff',
                                 color: '#000',
@@ -138,7 +130,14 @@ export default function Home() {
                                 },
                             }}
                         >
-                            Log out
+                            <BiLogOut size='1.2em' />
+                            <Typography
+                                sx={{
+                                    pl: 1,
+                                }}
+                            >
+                                Log out
+                            </Typography>
                         </Button>
                     </Toolbar>
                 </Container>

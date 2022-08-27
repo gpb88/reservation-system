@@ -50,15 +50,9 @@ export default function AddClass(props) {
 
     const handleAddClass = async () => {
         // ? Data validation
-        if (new Date(startTime).getTime() > new Date(endTime).getTime()) {
+        if (new Date(startTime).getTime() >= new Date(endTime).getTime()) {
             return enqueueSnackbar("End time can't precede start time!", {
-                variant: 'error',
-            });
-        } else if (
-            new Date(startTime).getTime() == new Date(endTime).getTime()
-        ) {
-            return enqueueSnackbar("Start time can't be same as end time!", {
-                variant: 'error',
+                variant: 'warning',
             });
         }
 
@@ -69,7 +63,7 @@ export default function AddClass(props) {
             new Date(endTime),
             machine
         )
-            .then(() => {
+            .then((response) => {
                 return enqueueSnackbar('Class successfully added', {
                     variant: 'success',
                 });
@@ -81,53 +75,53 @@ export default function AddClass(props) {
             });
     };
 
-    const filterStartDate = (time) => {
+    const filterStartTimes = (time) => {
         let isAvailable = true;
-        const dateFromPicker = new Date(time);
+        // const dateFromPicker = new Date(time);
 
-        // ? Check if dates are already reseved
-        classes.forEach((_class) => {
-            const classStartDate = new Date(_class.start);
-            const classEndDate = new Date(_class.end);
+        // // ? Check if dates are already reseved
+        // classes.forEach((_class) => {
+        //     const classStartDate = new Date(_class.start);
+        //     const classEndDate = new Date(_class.end);
 
-            if (
-                classStartDate.getTime() <= dateFromPicker.getTime() &&
-                classEndDate.getTime() >= dateFromPicker.getTime()
-            ) {
-                isAvailable = false;
-            }
-        });
+        //     if (
+        //         classStartDate.getTime() <= dateFromPicker.getTime() &&
+        //         classEndDate.getTime() >= dateFromPicker.getTime()
+        //     ) {
+        //         isAvailable = false;
+        //     }
+        // });
 
-        // ? Exclude time already passed in current day
-        const today = new Date();
+        // // ? Exclude time already passed in current day
+        // const today = new Date();
 
-        if (
-            dateFromPicker.getDay() == today.getDay() &&
-            dateFromPicker.getMonth() == today.getMonth() &&
-            dateFromPicker.getYear() == today.getYear() &&
-            dateFromPicker.getTime() <= today.getTime()
-        )
-            isAvailable = false;
+        // if (
+        //     dateFromPicker.getDay() == today.getDay() &&
+        //     dateFromPicker.getMonth() == today.getMonth() &&
+        //     dateFromPicker.getYear() == today.getYear() &&
+        //     dateFromPicker.getTime() <= today.getTime()
+        // )
+        //     isAvailable = false;
 
         return isAvailable;
     };
 
-    const filterEndDate = (time) => {
+    const filterEndTimes = (time) => {
         let isAvailable = true;
-        const dateFromPicker = new Date(time);
+        // const dateFromPicker = new Date(time);
 
-        // ? Check if dates are already reseved
-        classes.forEach((_class) => {
-            const classStart = new Date(_class.start);
-            const classEnd = new Date(_class.end);
+        // // ? Check if dates are already reseved
+        // classes.forEach((_class) => {
+        //     const classStart = new Date(_class.start);
+        //     const classEnd = new Date(_class.end);
 
-            if (
-                classStart.getTime() <= dateFromPicker.getTime() &&
-                classEnd.getTime() >= dateFromPicker.getTime()
-            ) {
-                isAvailable = false;
-            }
-        });
+        //     if (
+        //         classStart.getTime() <= dateFromPicker.getTime() &&
+        //         classEnd.getTime() >= dateFromPicker.getTime()
+        //     ) {
+        //         isAvailable = false;
+        //     }
+        // });
 
         return isAvailable;
     };
@@ -147,8 +141,6 @@ export default function AddClass(props) {
                     display: 'flex',
                     justifyItems: 'center',
                     alignItems: 'center',
-
-                    p: 2,
                 }}
                 spacing={2}
             >
@@ -230,7 +222,7 @@ export default function AddClass(props) {
                         <DatePicker
                             className='add-class-datepicker'
                             showTimeSelect
-														popperPlacement="right"
+                            popperPlacement='right'
                             timeFormat='HH:mm'
                             dateFormat='MMMM d yyyy, HH:mm'
                             selected={startTime}
@@ -247,7 +239,7 @@ export default function AddClass(props) {
                                     ),
                                 },
                             ]}
-                            filterTime={filterStartDate}
+                            filterTime={filterStartTimes}
                         />
                     </Container>
                 </Grid>
@@ -286,7 +278,7 @@ export default function AddClass(props) {
                             className='add-class-datepicker'
                             showTimeSelect
                             timeFormat='HH:mm'
-														popperPlacement="right"
+                            popperPlacement='right'
                             dateFormat='MMMM d yyyy, HH:mm'
                             selected={endTime}
                             onChange={(date) => setEndTime(date)}
@@ -300,7 +292,7 @@ export default function AddClass(props) {
                                     ),
                                 },
                             ]}
-                            filterTime={filterEndDate}
+                            filterTime={filterEndTimes}
                         />
                     </Container>
                 </Grid>
@@ -352,7 +344,7 @@ export default function AddClass(props) {
                         </Select>
                     </Container>
                 </Grid>
-								
+
                 <Grid
                     item
                     xs={12}

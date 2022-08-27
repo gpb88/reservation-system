@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import 'styles/timetable.css';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -21,6 +21,7 @@ export default function Timetable() {
     const refreshClasses = () => {
         getClasses()
             .then((response) => {
+                console.log(new Date(response[0].start_time));
                 let newClasses = [];
                 response.forEach((_class) => {
                     let newClass = {};
@@ -63,7 +64,7 @@ export default function Timetable() {
             ) : null}
             <Calendar
                 localizer={localizer}
-								culture='en-gb'
+                culture='en-gb'
                 events={classes}
                 startAccessor='start'
                 endAccessor='end'

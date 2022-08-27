@@ -9,44 +9,55 @@ import {
     DialogContent,
     DialogActions,
 } from '@mui/material';
-import { addMachine } from 'API';
+import { deleteMachine, updateMachine } from 'API';
 import { useSnackbar } from 'notistack';
 
-export default function AddMachine(props) {
-    const [name, setName] = React.useState([]);
-    const [description, setDescription] = React.useState('');
+export default function MachineCard(props) {
+    const [name, setName] = React.useState(props.machine.machine_name);
+    const [description, setDescription] = React.useState(
+        props.machine.description
+    );
 
-    const { enqueueSnackbar} = useSnackbar();
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-    React.useEffect(() => {
-        resetVariables();
-    }, []);
-
-    const resetVariables = () => {
-        setName('');
-        setDescription('');
-    };
-
-    async function handleAdd() {
-        if (!name)
-            enqueueSnackbar('Fill name field!', {
-                variant: 'error',
-            });
-        else {
-            addMachine(name, description).then(() => {
-                enqueueSnackbar('Machine has been added!', {
+    const handleUpdateMachine = () => {
+        updateMachine(props.machine.machine_id, name, description)
+            .then((response) => {
+                enqueueSnackbar('Machine has been updated!', {
                     variant: 'success',
                 });
                 props.refreshData();
                 props.handleClose();
+            })
+            .catch((err) => {
+                enqueueSnackbar('Error occurred!', {
+                    variant: 'error',
+                });
+                console.error(err);
             });
-        }
-    }
+    };
+
+    const handleDeleteMachine = () => {
+        deleteMachine(props.machine.machine_id)
+            .then((response) => {
+                enqueueSnackbar('Machine has been deleted!', {
+                    variant: 'success',
+                });
+                props.refreshData();
+                props.handleClose();
+            })
+            .catch((err) => {
+                enqueueSnackbar('Error occurred!', {
+                    variant: 'error',
+                });
+                console.error(err);
+            });
+    };
 
     return (
         <Dialog open={props.open} onClose={props.handleClose}>
             <DialogTitle sx={{ mt: 2, pb: 2 }} align='center' variant='h4'>
-                Add new machine
+                Edit machine
             </DialogTitle>
             <DialogContent>
                 <Grid
@@ -55,7 +66,8 @@ export default function AddMachine(props) {
                         display: 'flex',
                         justifyItems: 'center',
                         alignItems: 'center',
-                        px: 6,
+                        pl: 6,
+                        pr: 6,
                         pt: 2,
                     }}
                     spacing={2}
@@ -116,11 +128,22 @@ export default function AddMachine(props) {
                 <Button
                     variant='contained'
                     size='large'
-                    onClick={() => {
-                        handleAdd();
-                    }}
+                    onClick={handleUpdateMachine}
                 >
                     Submit
+                </Button>
+                <Button
+                    variant='contained'
+                    size='large'
+                    onClick={handleDeleteMachine}
+                    color='error'
+                    sx={{
+                        '&:hover': {
+                            backgroundColor: '#9a0007 !important',
+                        },
+                    }}
+                >
+                    Delete
                 </Button>
             </DialogActions>
         </Dialog>

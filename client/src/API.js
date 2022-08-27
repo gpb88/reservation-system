@@ -92,6 +92,23 @@ export async function addMachine(name, description) {
     return result;
 }
 
+export async function updateMachine(machineID, name, description) {
+    const result = await axios
+        .put(baseUrl + '/machine', {
+            machineID: machineID,
+            name: name,
+            description: description,
+        })
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
 export async function getMachines() {
     const result = await axios
         .get(baseUrl + '/machine/all')
@@ -118,9 +135,9 @@ export async function getMachine(machineID) {
     return result;
 }
 
-export async function deleteMachine(name) {
+export async function deleteMachine(machineID) {
     const result = await axios
-        .delete(baseUrl + '/machine', { data: { name: name } })
+        .delete(baseUrl + '/machine', { data: { machineID: machineID } })
         .then(function (response) {
             return response.data;
         })
@@ -174,10 +191,12 @@ export async function addUser(username, role, password) {
     return result;
 }
 
-export async function deleteUser(username) {
+export async function updateUser(userID, username, role) {
     const result = await axios
-        .delete(baseUrl + '/user', {
-            data: { username: username },
+        .put(baseUrl + '/user', {
+            userID: userID,
+            username: username,
+            role: role,
         })
         .then(function (response) {
             return response.data;
@@ -189,7 +208,22 @@ export async function deleteUser(username) {
     return result;
 }
 
-export async function updatePermissions(userID, permissions) {
+export async function deleteUser(userID) {
+    const result = await axios
+        .delete(baseUrl + '/user', {
+            data: { userID: userID },
+        })
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function setPermissions(userID, permissions) {
     const result = await axios
         .post(baseUrl + '/permissions', {
             userID: userID,

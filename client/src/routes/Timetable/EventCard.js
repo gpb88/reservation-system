@@ -19,6 +19,7 @@ import { useSnackbar } from 'notistack';
 export default function Timetable(props) {
     const [user, setUser] = React.useState('');
     const [machine, setMachine] = React.useState('');
+    const [timeZone, setTimeZone] = React.useState('Europe/Warsaw');
 
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -33,15 +34,23 @@ export default function Timetable(props) {
     }, []);
 
     const handleDelete = () => {
-        deleteClass(props.event.ID).then((response) => {
-            props.refreshClasses();
-            props.handleClose();
-        });
+        deleteClass(props.event.ID)
+            .then((response) => {
+                enqueueSnackbar('Event has been successfully deleted!', {
+                    variant: 'success',
+                });
+                props.refreshClasses();
+                props.handleClose();
+            })
+            .catch((err) => {
+                enqueueSnackbar('Error occured!', {
+                    variant: 'error',
+                });
+                console.error(err);
+            });
     };
 
     const handleUploadToGoogleCalendar = () => {
-        let timeZone = 'Europe/Warsaw';
-
         const event = {
             summary: props.event.title,
             // description: 'Test description',
@@ -61,16 +70,16 @@ export default function Timetable(props) {
 
         uploadToGoogleCalendar(eventsArr)
             .then((response) => {
-                console.log(response);
                 enqueueSnackbar('Event has been added to your calendar!', {
                     variant: 'success',
                 });
+                console.log(response);
             })
             .catch((err) => {
-                console.error(err);
                 enqueueSnackbar('Error occurred', {
                     variant: 'error',
                 });
+                console.error(err);
             });
     };
 
@@ -80,7 +89,7 @@ export default function Timetable(props) {
             onClose={props.handleClose}
             className='event-card'
         >
-            <DialogTitle variant='h3' sx={{ textAlign: 'center' }}>
+            <DialogTitle sx={{ mt: 2 }} align='center' variant='h4'>
                 {props.event.title}
             </DialogTitle>
             <DialogContent>
@@ -90,7 +99,6 @@ export default function Timetable(props) {
                         display: 'flex',
                         justifyItems: 'center',
                         alignItems: 'center',
-                        p: 2,
                     }}
                     spacing={2}
                 >
@@ -141,11 +149,9 @@ export default function Timetable(props) {
                 sx={{
                     display: 'flex',
                     justifyContent: 'center',
+                    mb: 2,
                 }}
             >
-                <Button size='large' variant='contained' onClick={handleDelete}>
-                    Delete
-                </Button>
                 <Button
                     size='large'
                     variant='outlined'
@@ -165,6 +171,19 @@ export default function Timetable(props) {
                         style={{ marginRight: '10px' }}
                     />
                     Add to Google Calendar
+                </Button>
+                <Button
+                    color='error'
+                    size='large'
+                    variant='contained'
+                    onClick={handleDelete}
+                    sx={{
+                        '&:hover': {
+                            backgroundColor: '#9a0007 !important',
+                        },
+                    }}
+                >
+                    Delete
                 </Button>
             </DialogActions>
         </Dialog>

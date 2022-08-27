@@ -6,7 +6,7 @@ CREATE TABLE roles (
 CREATE TABLE users (
   user_id serial PRIMARY KEY
 , username varchar(128) NOT NULL
-, u_role int NOT NULL DEFAULT 1 REFERENCES roles (role_id) ON UPDATE CASCADE
+, u_role int NOT NULL DEFAULT 1 REFERENCES roles (role_id)
 , u_password varchar(70)
 );
 
@@ -17,16 +17,16 @@ CREATE TABLE machines (
 );
 
 CREATE TABLE permissions (
-  user_id serial REFERENCES users (user_id) ON UPDATE CASCADE ON DELETE CASCADE
-, machine_id int REFERENCES machines (machine_id) ON UPDATE CASCADE
+  user_id serial REFERENCES users (user_id) ON DELETE CASCADE
+, machine_id int REFERENCES machines (machine_id) ON DELETE CASCADE
 , CONSTRAINT user_machines_pkey PRIMARY KEY (user_id, machine_id)
 );
 
 CREATE TABLE classes (
   class_id serial PRIMARY KEY
-, user_id int REFERENCES users (user_id) ON UPDATE CASCADE ON DELETE CASCADE
+, user_id int REFERENCES users (user_id) ON DELETE CASCADE
 , title varchar(150) NOT NULL
 , start_time TIMESTAMPTZ NOT NULL
 , end_time TIMESTAMPTZ NOT NULL
-, machine_id int REFERENCES machines (machine_id)
+, machine_id int REFERENCES machines (machine_id) ON DELETE CASCADE
 );

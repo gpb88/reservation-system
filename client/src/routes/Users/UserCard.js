@@ -13,58 +13,82 @@ import {
     DialogContent,
     DialogActions,
 } from '@mui/material';
-import { getRoles, addUser } from 'API';
-import { hashPass } from 'services/password';
+import { getRoles, deleteUser, updateUser } from 'API';
 import { useSnackbar } from 'notistack';
 
-export default function AddUser(props) {
-    const [roles, setRoles] = React.useState([]);
-    const [username, setUsername] = React.useState('');
-    const [role, setRole] = React.useState('');
-    const [password1, setPassword1] = React.useState('');
-    const [password2, setPassword2] = React.useState('');
+export default function UserCard(props) {
+    const [username, setUsername] = React.useState(props.selectedUser.username);
+    const [roleID, setRoleID] = React.useState(props.selectedUser.role_id);
+    const [roles, setRoles] = React.useState(props.roles);
 
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     React.useEffect(() => {
-        resetVariables();
-
         getRoles().then((response) => {
             setRoles(response);
         });
     }, []);
 
-    const resetVariables = () => {
-        setUsername('');
-        setRole('');
-        setPassword1('');
-        setPassword2('');
+    const handleUpdateUser = () => {
+        updateUser(props.selectedUser.user_id, username, roleID)
+            .then((response) => {
+                // ? Check if the user is currenly logged in, if so logout
+                if (props.currentUser.user_id == props.selectedUser.user_id) {
+                    enqueueSnackbar(
+                        'Since you updated your user, you have been logged out',
+                        {
+                            variant: 'warning',
+                        }
+                    );
+                    props.logout();
+                } else {
+                    enqueueSnackbar('User has been updated!', {
+                        variant: 'success',
+                    });
+                    props.refreshData();
+                    props.handleClose();
+                }
+            })
+            .catch((err) => {
+                enqueueSnackbar('Error occurred!', {
+                    variant: 'error',
+                });
+                console.error(err);
+            });
     };
 
-    async function handleAdd() {
-        if (!username || !role || !password1 || !password2)
-            enqueueSnackbar('Fill all fields!', {
-                variant: 'error',
-            });
-        else if (password1 != password2)
-            enqueueSnackbar('Passwords do not match!', {
-                variant: 'error',
-            });
-        else {
-            addUser(username, role, hashPass(password1)).then(() => {
-                enqueueSnackbar('User has been added!', {
-                    variant: 'success',
+    const handleDeleteUser = () => {
+        deleteUser(props.selectedUser.user_id)
+            .then((response) => {
+                // ? Check if the user is currenly logged in, if so logout
+                if (props.currentUser.user_id == props.selectedUser.user_id) {
+                    enqueueSnackbar(
+                        'Since you deleted your user, you have been logged out',
+                        {
+                            variant: 'warning',
+                        }
+                    );
+                    props.logout();
+                } else {
+                    enqueueSnackbar('User has been deleted!', {
+                        variant: 'success',
+                    });
+                    props.refreshData();
+                    props.handleClose();
+                }
+            })
+            .catch((err) => {
+                enqueueSnackbar('Error occurred!', {
+                    variant: 'error',
                 });
-                props.refreshData();
-                props.handleClose();
+                console.error(err);
             });
-        }
-    }
+    };
 
     return (
         <Dialog open={props.open} onClose={props.handleClose}>
             <DialogTitle sx={{ mt: 2, pb: 2 }} align='center' variant='h4'>
-                Add new user
+                Edit user
             </DialogTitle>
             <DialogContent>
                 <Grid
@@ -112,15 +136,12 @@ export default function AddUser(props) {
                         }}
                     >
                         <FormControl sx={{ width: '100%' }}>
-                            <InputLabel id='select-role-label'>
-                                Select role
-                            </InputLabel>
+                            <InputLabel>Select role</InputLabel>
                             <Select
                                 label='Select role'
-                                value={role}
+                                value={roleID}
                                 onChange={(e) => {
-                                    setRole(e.target.value);
-                                    console.log(e.target.value);
+                                    setRoleID(e.target.value);
                                 }}
                             >
                                 {roles.map((role) => (
@@ -134,50 +155,6 @@ export default function AddUser(props) {
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={6}>
-                        <Typography variant='h5'>Password:</Typography>
-                    </Grid>
-                    <Grid
-                        item
-                        xs={6}
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <TextField
-                            variant='outlined'
-                            type='password'
-                            label='Enter password'
-                            value={password1}
-                            onChange={(e) => {
-                                setPassword1(e.target.value);
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Typography variant='h5'>Confirm password:</Typography>
-                    </Grid>
-                    <Grid
-                        item
-                        xs={6}
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <TextField
-                            variant='outlined'
-                            type='password'
-                            label='Confirm password'
-                            value={password2}
-                            onChange={(e) => {
-                                setPassword2(e.target.value);
-                            }}
-                        />
-                    </Grid>
                 </Grid>
             </DialogContent>
             <DialogActions
@@ -190,11 +167,22 @@ export default function AddUser(props) {
                 <Button
                     variant='contained'
                     size='large'
-                    onClick={() => {
-                        handleAdd();
-                    }}
+                    onClick={handleUpdateUser}
                 >
                     Submit
+                </Button>
+                <Button
+                    variant='contained'
+                    size='large'
+                    onClick={handleDeleteUser}
+                    color='error'
+                    sx={{
+                        '&:hover': {
+                            backgroundColor: '#9a0007 !important',
+                        },
+                    }}
+                >
+                    Delete
                 </Button>
             </DialogActions>
         </Dialog>

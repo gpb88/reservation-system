@@ -6,6 +6,7 @@ const {
     getUsers,
     addUser,
     deleteUser,
+    updateUser,
 } = require('services/dbController');
 
 router.get('/', async function (req, res) {
@@ -46,6 +47,29 @@ router.get('/all', async function (req, res) {
     }
 });
 
+router.put('/', async function (req, res) {
+    try {
+        const { userID, username, role } = req.body;
+
+        // * Validate user input
+        if (!username || !role) {
+            console.log('Incomplete data');
+            return res.status(400).send({ message: 'Incomplete data' });
+        }
+
+        try {
+            await updateUser(userID, username, role);
+            return res.status(200).send({ message: 'User updated' });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ message: 'Something went wrong' });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ message: 'Unknown error occured' });
+    }
+});
+
 router.post('/', async function (req, res) {
     try {
         const { username, role, password } = req.body;
@@ -56,17 +80,17 @@ router.post('/', async function (req, res) {
             return res.status(200).send({ message: 'Incomplete data' });
         }
 
-        const user = await getUser(username);
+        const user = await getUserByName(username);
 
         // * User not found => can be added
-        if (user == false) {
+        if (user == false || user == null) {
             try {
                 await addUser(username, role, password);
                 return res.status(200).send({ message: 'User added' });
             } catch (error) {
                 console.log(error);
                 return res
-                    .status(200)
+                    .status(500)
                     .send({ message: 'Something went wrong' });
             }
         }
@@ -80,15 +104,15 @@ router.post('/', async function (req, res) {
 
 router.delete('/', async function (req, res) {
     try {
-        const { username } = req.body;
+        const { userID } = req.body;
 
         // * Validate user input
-        if (!username) {
-            console.log('No username');
-            return res.status(200).send({ message: 'No username' });
+        if (!userID) {
+            console.log('No user ID');
+            return res.status(200).send({ message: 'No user ID' });
         }
 
-        await deleteUser(username);
+        await deleteUser(userID);
 
         return res.status(200).send({ message: 'Success' });
     } catch (error) {

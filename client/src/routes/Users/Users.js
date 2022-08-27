@@ -1,89 +1,113 @@
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
+import * as React from 'react';
+import { Container, Typography, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import React, { useState, useEffect } from 'react';
-import { getUsers } from 'API';
-import AddUser from './AddUser';
-import DeleteUser from './DeleteUser';
+import { getUsers, getRoles } from 'API';
+import { FaPlus } from 'react-icons/fa';
+import 'styles/users.css';
+import AddUser from 'routes/Users/AddUser';
+import UserCard from 'routes/Users/UserCard';
 
 const columns = [
     { field: 'username', headerName: 'Username', flex: 1, minWidth: 150 },
     { field: 'role', headerName: 'Role', flex: 1, minWidth: 150 },
 ];
 
-export default function UserPage() {
-    const [users, setUsers] = useState([]);
-    const [isAddWindowOpen, setIsAddWindowOpen] = useState(false);
-    const [isDeletePromptOpen, setIsDeletePromptOpen] = useState(false);
-    const [deleteTarget, setDeleteTarget] = useState('');
+export default function UserPage(props) {
+    const [users, setUsers] = React.useState([]);
+    const [showUserWindow, setShowUserWindow] = React.useState(false);
+    const [showUserAddWindow, setShowUserAddWindow] = React.useState(false);
+    const [selectedUser, setSelectedUser] = React.useState('');
+    const [roles, setRoles] = React.useState([]);
 
-    const handleAddWindow = () => {
-        setIsAddWindowOpen(!isAddWindowOpen);
-    };
-
-    const handleDeletePrompt = () => {
-        setIsDeletePromptOpen(!isDeletePromptOpen);
-    };
+    React.useEffect(() => {
+        refreshData();
+    }, []);
 
     const refreshData = () => {
         getUsers().then((response) => {
-            console.log(response);
             setUsers(response);
         });
     };
 
-    useEffect(() => {
-        refreshData();
-    }, []);
+    const handleRowClick = (user) => {
+        console.log(user);
+        getRoles()
+            .then((response) => {
+                setRoles(response);
+
+                // ? Remove reference to original row object
+                let userCopy = { ...user };
+                setSelectedUser(userCopy);
+                setShowUserWindow(true);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    };
 
     return (
-        <div id='user-page'>
-            <Typography variant='h4' component='h1' sx={{ m: 6 }}>
-                User management
+        <Container
+            id='user-page'
+            maxWidth='sm'
+            disableGutters={true}
+            sx={{ display: 'grid', justifyItems: 'center' }}
+        >
+            <Typography variant='h4' component='h1' sx={{ mt: 6, mb: 4 }}>
+                Users
             </Typography>
             <Button
                 variant='contained'
-                sx={{ ml: 6, mb: 6, fontSize: '1.3rem' }}
-                onClick={handleAddWindow}
+                sx={{ justifySelf: 'right', mb: 2 }}
+                onClick={() => {
+                    setShowUserAddWindow(true);
+                }}
             >
-                Add new user
+                <FaPlus size='2em' />
             </Button>
-            <div style={{ width: '60%' }}>
-                <DataGrid
-                    getRowId={(row) => row.user_id}
-                    rows={users}
-                    columns={columns}
-                    pageSize={5}
-                    rowsPerPageOptions={[5]}
-                    sx={{
-                        fontSize: '1.5rem',
-                        ml: 6,
-                        width: '100%',
-                        userSelect: 'none !important',
+            <DataGrid
+                getRowId={(row) => row.user_id}
+                rows={users}
+                columns={columns}
+                pageSize={5}
+                rowsPerPageOptions={[5]}
+                sx={{
+                    fontSize: '1.5em',
+                    width: '100%',
+                    userSelect: 'none !important',
+                    padding: 'none !important',
+                }}
+                autoHeight={true}
+                disableSelectionOnClick
+                disableColumnFilter
+                disableColumnMenu
+                disableColumnSelector
+                disableDensitySelector
+                onRowClick={(data) => {
+                    handleRowClick(data.row);
+                }}
+            />
+            {showUserAddWindow ? (
+                <AddUser
+                    open={showUserAddWindow}
+                    handleClose={() => {
+                        setShowUserAddWindow(false);
                     }}
-                    autoHeight={true}
-                    disableSelectionOnClick
-                    disableColumnFilter
-                    disableColumnMenu
-                    disableColumnSelector
-                    disableDensitySelector
-                    onRowDoubleClick={(data) => {
-                        setDeleteTarget(data.row.username);
-                        handleDeletePrompt();
-                    }}
+                    refreshData={refreshData}
                 />
-            </div>
-            <AddUser
-                open={isAddWindowOpen}
-                handleClose={handleAddWindow}
-                refreshData={refreshData}
-            />
-            <DeleteUser
-                open={isDeletePromptOpen}
-                handleClose={handleDeletePrompt}
-                deleteTarget={deleteTarget}
-                refreshData={refreshData}
-            />
-        </div>
+            ) : null}
+            {showUserWindow ? (
+                <UserCard
+                    open={showUserWindow}
+                    handleClose={() => {
+                        setShowUserWindow(false);
+                    }}
+                    refreshData={refreshData}
+                    selectedUser={selectedUser}
+                    roles={roles}
+                    logout={props.logout}
+                    currentUser={props.user}
+                />
+            ) : null}
+        </Container>
     );
 }
