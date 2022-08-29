@@ -11,7 +11,6 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { handleLogin } from 'services/handleLogin';
-import { getUserByName } from 'API';
 import { GoogleLogin } from '@react-oauth/google';
 import { OAuth2Client } from 'google-auth-library';
 import { useSnackbar } from 'notistack';
@@ -20,9 +19,9 @@ export default function Login() {
     let [rememberMe, setRememberMe] = React.useState(false);
 
     let navigate = useNavigate();
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const { enqueueSnackbar } = useSnackbar();
 
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
         event.preventDefault();
 
         const data = new FormData(event.currentTarget);
@@ -31,33 +30,20 @@ export default function Login() {
             password: data.get('password'),
         };
 
-        handleLogin(loginUser, rememberMe)
-            .then(() => {
-                handleRedirect(loginUser);
-            })
-            .catch((err) => {
-                console.error(err);
+        let authenticated = await handleLogin(loginUser, rememberMe).catch(
+            (err) => {
                 enqueueSnackbar('Error occured!', {
                     variant: 'error',
                 });
-            });
-    }
+            }
+        );
 
-    const handleRedirect = async (loginUser) => {
-        let userData = await getUserByName(loginUser.username);
-        if (userData) {
-            let user = {
-                ID: userData.user_id,
-                name: userData.username,
-                role: userData.role,
-            };
-
-            navigate('/home');
-        } else
-            return enqueueSnackbar('User not found!', {
+        if (authenticated) navigate('/home');
+        else
+            enqueueSnackbar('Error occured!', {
                 variant: 'error',
             });
-    };
+    }
 
     const getDecodedOAuthJwtGoogle = async (clientID, token) => {
         const CLIENT_ID_GOOGLE = clientID;

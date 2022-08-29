@@ -21,7 +21,7 @@ export default function UserCard(props) {
     const [roleID, setRoleID] = React.useState(props.selectedUser.role_id);
     const [roles, setRoles] = React.useState(props.roles);
 
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const { enqueueSnackbar } = useSnackbar();
 
     React.useEffect(() => {
         getRoles().then((response) => {

@@ -2,29 +2,29 @@ const express = require('express');
 const router = express.Router();
 const { validateToken, createToken } = require('services/token');
 
-router.post('/', async function (req, res) {
-    try {
-        const { token } = req.body;
-        const isValid = validateToken(token);
-        if (isValid) return res.status(200).send({ message: 'Success' });
+router.post('/', function (req, res) {
+    const { token } = req.body;
 
-        res.status(400).send({ message: 'Token is not valid' });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: 'Unknown error occured' });
-    }
+    validateToken(token)
+        .then((isValid) => {
+            console.log(isValid);
+            isValid ? res.status(200).send() : res.status(400).send();
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send();
+        });
 });
 
-router.get('/', async function (req, res) {
-    try {
-        const { username, role } = req.query;
+router.get('/', function (req, res) {
+    const { username, role } = req.query;
 
-        // * Create JWT token
-        const token = createToken(username, role);
-        res.status(200).send({ message: 'Success', token: token });
+    try {
+        let token = createToken(username, role);
+        res.status(200).send({ token: token });
     } catch (error) {
         console.log(error);
-        res.status(500).send({ message: 'Unknown error occured' });
+        res.status(500).send();
     }
 });
 

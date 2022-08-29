@@ -11,29 +11,35 @@ import { getUserByName } from 'API';
 import { BiLogOut } from 'react-icons/bi';
 
 export default function Home() {
-    let [pages, setPages] = React.useState([]);
     let [user, setUser] = React.useState('');
+    let [pages, setPages] = React.useState([]);
 
     let [pageComponent, setPageComponent] = React.useState(<Timetable />);
 
     let navigate = useNavigate();
 
-    React.useEffect(async () => {
+    React.useEffect(() => {
         let token = getToken();
         if (token) {
             let username = getUsername();
-            let user = await getUserByName(username);
-            setUser(user);
 
-            user.role == 'admin'
-                ? setPages([
-                      'Timetable',
-                      'Add class',
-                      'Users',
-                      'Machines',
-                      'Permissions',
-                  ])
-                : setPages(['Timetable', 'Add class']);
+            getUserByName(username)
+                .then((user) => {
+                    setUser(user);
+
+                    user.role == 'admin'
+                        ? setPages([
+                              'Timetable',
+                              'Add class',
+                              'Users',
+                              'Machines',
+                              'Permissions',
+                          ])
+                        : setPages(['Timetable', 'Add class']);
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
         } else logout();
     }, []);
 
@@ -91,9 +97,13 @@ export default function Home() {
                             }}
                         >
                             <img
+                                className='logo'
                                 width='64'
                                 src='/images/logo_agh.png'
                                 alt='logo'
+                                onClick={() => {
+                                    switchPage('Timetable');
+                                }}
                             />
                         </Typography>
                         <Container
@@ -119,11 +129,10 @@ export default function Home() {
                         <Button
                             onClick={() => logout()}
                             sx={{
-                                color: 'white',
+                                color: '#000',
                                 display: 'flex',
                                 textTransform: 'none',
                                 backgroundColor: '#fff',
-                                color: '#000',
                                 '&:hover': {
                                     backgroundColor: '#fff',
                                     textDecoration: 'underline',

@@ -3,7 +3,7 @@ import { Container, Typography, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { getUsers, getRoles } from 'API';
 import { FaPlus } from 'react-icons/fa';
-import 'styles/users.css';
+import 'styles/datagrid.css';
 import AddUser from 'routes/Users/AddUser';
 import UserCard from 'routes/Users/UserCard';
 
@@ -49,7 +49,7 @@ export default function UserPage(props) {
         <Container
             id='user-page'
             maxWidth='sm'
-            disableGutters={true}
+            disableGutters
             sx={{ display: 'grid', justifyItems: 'center' }}
         >
             <Typography variant='h4' component='h1' sx={{ mt: 6, mb: 4 }}>
@@ -76,7 +76,7 @@ export default function UserPage(props) {
                     userSelect: 'none !important',
                     padding: 'none !important',
                 }}
-                autoHeight={true}
+                autoHeight
                 disableSelectionOnClick
                 disableColumnFilter
                 disableColumnMenu

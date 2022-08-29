@@ -18,7 +18,7 @@ export default function MachineCard(props) {
         props.machine.description
     );
 
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const { enqueueSnackbar } = useSnackbar();
 
     const handleUpdateMachine = () => {
         updateMachine(props.machine.machine_id, name, description)

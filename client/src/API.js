@@ -13,7 +13,6 @@ export async function getUserByName(username) {
         })
         .catch(function (error) {
             console.error(error);
-            return error.response;
         });
 
     return result;
@@ -27,7 +26,6 @@ export async function getUserByID(userID) {
         })
         .catch(function (error) {
             console.error(error);
-            return error.response;
         });
 
     return result;
@@ -284,13 +282,66 @@ export async function deleteClass(classID) {
     return result;
 }
 
+export async function getCalendars() {
+	const result = await axios
+			.get(baseUrl + '/google/calendar')
+			.then(function (response) {
+					console.log(response)
+					return response.data.calendars;
+			})
+			.catch(function (error) {
+					console.error(error);
+			});
+
+	return result;
+}
+
+export async function createCalendar() {
+    const result = await axios
+        .post(baseUrl + '/google/calendar')
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
 export async function uploadToGoogleCalendar(events) {
     const result = await axios
-        .post(baseUrl + '/calendar', {
+        .post(baseUrl + '/google/event/batch', {
             events: events,
         })
         .then(function (response) {
             return response.data;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function getCalendarColors() {
+    const result = await axios
+        .get(baseUrl + '/google/calendar/colors')
+        .then(function (response) {
+            return response.data.colors;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function getEventColors() {
+    const result = await axios
+        .get(baseUrl + '/google/event/colors')
+        .then(function (response) {
+            return response.data.colors;
         })
         .catch(function (error) {
             console.error(error);

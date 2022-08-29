@@ -7,12 +7,14 @@ import {
     MenuItem,
     Container,
     Select,
+    Box,
 } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'styles/add-class.css';
-import { getClasses, addClass, getPermissions } from 'API';
+import { getClasses, addClass, getPermissions, getEventColors } from 'API';
 import { useSnackbar } from 'notistack';
+import { CirclePicker } from 'react-color';
 
 export default function AddClass(props) {
     const [title, setTitle] = React.useState('My Event');
@@ -21,8 +23,10 @@ export default function AddClass(props) {
     const [classes, setClasses] = React.useState([]);
     const [machine, setMachine] = React.useState('');
     const [machines, setMachines] = React.useState([]);
+    const [colorID, setColorID] = React.useState('');
+    const [colors, setColors] = React.useState([]);
 
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const { enqueueSnackbar } = useSnackbar();
 
     React.useEffect(() => {
         getClasses().then((response) => {
@@ -41,6 +45,17 @@ export default function AddClass(props) {
 
         getPermissions(props.user.user_id).then((response) => {
             setMachines(response);
+        });
+
+        getEventColors().then((response) => {
+            let objArr = Object.values(response);
+            let colorArr = [];
+            objArr.forEach((obj) => {
+                colorArr.push(obj.background);
+            });
+
+            setColors(colorArr);
+            setColorID(0);
         });
     }, []);
 
@@ -126,6 +141,10 @@ export default function AddClass(props) {
         return isAvailable;
     };
 
+    const handleColorChange = (color) => {
+        setColorID(colors.indexOf(color.hex));
+    };
+
     const times = [];
     for (let i = 7; i <= 22; i++) {
         for (let j = 0; j < 4; j++) {
@@ -156,8 +175,19 @@ export default function AddClass(props) {
                     sx={{
                         display: 'flex',
                         justifyContent: 'center',
+                        alignItems: 'center',
                     }}
                 >
+                    <Box
+                        disableGutters
+                        sx={{
+                            width: '1.4em',
+                            height: '1.4em',
+                            backgroundColor: colors[colorID],
+                            mx: 2,
+                            borderRadius: '50%',
+                        }}
+                    />
                     <Typography
                         sx={{ width: '60%', textAlign: 'left' }}
                         variant='h6'
@@ -195,6 +225,48 @@ export default function AddClass(props) {
                     sx={{
                         display: 'flex',
                         justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Typography
+                        sx={{ width: '60%', textAlign: 'left' }}
+                        variant='h6'
+                        align='center'
+                    >
+                        Color
+                    </Typography>
+                </Grid>
+
+                <Grid
+                    item
+                    xs={12}
+                    sx={{
+                        justifySelf: 'center',
+                        display: 'flex',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Container
+                        sx={{
+                            width: '60%',
+                        }}
+                        disableGutters
+                    >
+                        <CirclePicker
+                            onChange={handleColorChange}
+                            className='circle-picker'
+                            colors={colors}
+                            width='60%'
+                        />
+                    </Container>
+                </Grid>
+
+                <Grid
+                    item
+                    xs={12}
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
                     }}
                 >
                     <Typography
@@ -217,7 +289,7 @@ export default function AddClass(props) {
                         sx={{
                             width: '60%',
                         }}
-                        disableGutters={true}
+                        disableGutters
                     >
                         <DatePicker
                             className='add-class-datepicker'
@@ -272,7 +344,7 @@ export default function AddClass(props) {
                         sx={{
                             width: '60%',
                         }}
-                        disableGutters={true}
+                        disableGutters
                     >
                         <DatePicker
                             className='add-class-datepicker'
@@ -325,7 +397,7 @@ export default function AddClass(props) {
                         sx={{
                             width: '60%',
                         }}
-                        disableGutters={true}
+                        disableGutters
                     >
                         <Select
                             value={machine}

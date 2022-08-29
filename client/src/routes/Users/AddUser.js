@@ -24,7 +24,7 @@ export default function AddUser(props) {
     const [password1, setPassword1] = React.useState('');
     const [password2, setPassword2] = React.useState('');
 
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const { enqueueSnackbar } = useSnackbar();
 
     React.useEffect(() => {
         resetVariables();

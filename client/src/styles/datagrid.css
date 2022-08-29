@@ -1,0 +1,7 @@
+.MuiDataGrid-cell:focus {
+	outline: none !important;
+}
+
+.MuiDataGrid-row:hover {
+	cursor: pointer !important;
+}

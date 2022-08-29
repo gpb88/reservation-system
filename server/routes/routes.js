@@ -4,7 +4,7 @@ const roles = require('routes/v1/roles');
 const machine = require('routes/v1/machine');
 const permissions = require('routes/v1/permissions');
 const _class = require('routes/v1/class');
-const calendar = require('routes/v1/calendar');
+const google = require('routes/v1/google');
 
 const version = 'v1';
 
@@ -15,5 +15,5 @@ module.exports = function (app) {
     app.use(`/${version}/machine`, machine);
     app.use(`/${version}/permissions`, permissions);
     app.use(`/${version}/class`, _class);
-    app.use(`/${version}/calendar`, calendar);
+    app.use(`/${version}/google`, google);
 };

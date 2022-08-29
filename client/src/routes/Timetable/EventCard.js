@@ -12,6 +12,8 @@ import {
     getUserByID,
     deleteClass,
     uploadToGoogleCalendar,
+    createCalendar,
+    getCalendars,
 } from 'API';
 import 'styles/event-card.css';
 import { useSnackbar } from 'notistack';
@@ -21,7 +23,7 @@ export default function Timetable(props) {
     const [machine, setMachine] = React.useState('');
     const [timeZone, setTimeZone] = React.useState('Europe/Warsaw');
 
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const { enqueueSnackbar } = useSnackbar();
 
     React.useEffect(() => {
         getMachine(props.event.machineID).then((response) => {
@@ -62,11 +64,22 @@ export default function Timetable(props) {
                 dateTime: props.event.end,
                 timezone: timeZone,
             },
-            colorId: 5,
+            colorId: 1,
         };
 
         let eventsArr = [];
         eventsArr.push(event);
+
+        // createCalendar().catch((err) => {
+        //     enqueueSnackbar('Error occurred', {
+        //         variant: 'error',
+        //     });
+        //     console.error(err);
+        // });
+
+        getCalendars().then((response) => {
+            console.log(response);
+        });
 
         uploadToGoogleCalendar(eventsArr)
             .then((response) => {

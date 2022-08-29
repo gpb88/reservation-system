@@ -6,17 +6,17 @@ const {
     revokePermission,
 } = require('services/dbController');
 
-router.get('/', async function (req, res) {
-    try {
-        const { userID } = req.query;
+router.get('/', function (req, res) {
+    const { userID } = req.query;
 
-        const permissions = await getPermisions(userID);
-
-        res.status(200).send({ message: 'Success', permissions: permissions });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: 'Unknown error occured' });
-    }
+    getPermisions(userID)
+        .then((permissions) => {
+            res.status(200).send({ permissions: permissions });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send();
+        });
 });
 
 router.post('/', function (req, res) {
@@ -33,16 +33,14 @@ router.post('/', function (req, res) {
         });
 
         Promise.all(promises)
-            .then(() =>
-                res.status(200).send({ message: 'Permissions updated' })
-            )
+            .then(() => res.status(200).send())
             .catch((error) => {
                 console.log(error);
-                res.status(400).send({ message: 'Something went wrong' });
+                res.status(500).send();
             });
     } catch (error) {
         console.log(error);
-        res.status(500).send({ message: 'Unknown error occured' });
+        res.status(500).send();
     }
 });
 

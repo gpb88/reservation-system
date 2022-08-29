@@ -7,85 +7,76 @@ const {
     deleteClass,
 } = require('services/dbController');
 
-router.get('/all', async function (req, res) {
-    try {
-        const classes = await getClasses();
-
-        res.status(200).send({ message: 'Success', classes: classes });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: 'Unknown error occured' });
-    }
+router.get('/all', function (req, res) {
+    getClasses()
+        .then((classes) => {
+            res.status(200).send({ classes: classes });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send();
+        });
 });
 
-router.post('/', async function (req, res) {
-    try {
-        let { userID, title, startTime, endTime, machineID } = req.body;
+router.post('/', function (req, res) {
+    let { userID, title, startTime, endTime, machineID } = req.body;
 
-        try {
-            // function dateRangeOverlaps(a_start, a_end, b_start, b_end) {
-            //     if (a_start <= b_start && b_start <= a_end) return true;
-            //     if (a_start <= b_end && b_end <= a_end) return true;
-            //     if (b_start < a_start && a_end < b_end) return true;
-            //     return false;
-            // }
+    addClass(userID, title, startTime, endTime, machineID)
+        .then(() => {
+            res.status(200).send();
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send();
+        });
+    // function dateRangeOverlaps(a_start, a_end, b_start, b_end) {
+    //     if (a_start <= b_start && b_start <= a_end) return true;
+    //     if (a_start <= b_end && b_end <= a_end) return true;
+    //     if (b_start < a_start && a_end < b_end) return true;
+    //     return false;
+    // }
 
-            // const classes = await getClassesForUser(userID);
-            // let i = 0;
-            // let len = classes.length;
-            // let datesOverlap = false;
-            // while (i < len) {
-            //     let a_start = new Date(startTime).getTime();
-            //     let a_end = new Date(endTime).getTime();
-            //     let b_start = new Date(classes[i].start_time).getTime();
-            //     let b_end = new Date(classes[i].end_time).getTime();
+    // const classes = await getClassesForUser(userID);
+    // let i = 0;
+    // let len = classes.length;
+    // let datesOverlap = false;
+    // while (i < len) {
+    //     let a_start = new Date(startTime).getTime();
+    //     let a_end = new Date(endTime).getTime();
+    //     let b_start = new Date(classes[i].start_time).getTime();
+    //     let b_end = new Date(classes[i].end_time).getTime();
 
-            //     if (dateRangeOverlaps(a_start, a_end, b_start, b_end)) {
-            //         datesOverlap = true;
-            //         break;
-            //     }
-            //     i++;
-            // }
+    //     if (dateRangeOverlaps(a_start, a_end, b_start, b_end)) {
+    //         datesOverlap = true;
+    //         break;
+    //     }
+    //     i++;
+    // }
 
-            // if (datesOverlap) {
-            //     return res
-            //         .status(200)
-            //         .send({ message: 'Class exists', overlaps: true });
-            // } else {
-            await addClass(userID, title, startTime, endTime, machineID);
-            return res
-                .status(200)
-                .send({ message: 'Class added' });
-            // }
-        } catch (error) {
-            console.log(error);
-            return res.status(200).send({ message: 'Something went wrong' });
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: 'Unknown error occured' });
-    }
+    // if (datesOverlap) {
+    //     return res
+    //         .status(200)
+    //         .send({ message: 'Class exists', overlaps: true });
+    // } else {
+    // }
 });
 
-router.delete('/', async function (req, res) {
-    try {
-        const { classID } = req.body;
+router.delete('/', function (req, res) {
+    const { classID } = req.body;
 
-        console.log(classID);
-
-        // * Validate user input
-        if (!classID) {
-            console.log('Incomplete data');
-            return res.status(200).send({ message: 'Incomplete data' });
-        }
-
-        await deleteClass(classID);
-
-        return res.status(200).send({ message: 'Success' });
-    } catch (error) {
-        console.log(error);
-        return res.status(200).send({ message: 'Unknown error occured' });
+    if (!classID) {
+        console.log('Incomplete data');
+        return res.status(400).send();
     }
+
+    deleteClass(classID)
+        .then(() => {
+            res.status(200).send();
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send();
+        });
 });
 
 module.exports = router;

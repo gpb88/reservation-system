@@ -13,112 +13,98 @@ router.get('/', async function (req, res) {
     try {
         const { userID, username } = req.query;
 
-        // * Validate user input
         if (!username && !userID) {
             console.log('No username or ID');
-            return res.status(200).send({ message: 'No username' });
+            return res.status(400).send();
         }
 
         let user = null;
         if (userID) user = await getUserByID(userID);
         else user = await getUserByName(username);
 
-        // * User not found
         if (user == false || user == null) {
             console.log('User not found');
-            return res.status(200).send({ message: 'User not found' });
+            return res.status(400).send();
         }
 
-        return res.status(200).send({ message: 'Success', user: user });
+        res.status(200).send({ user: user });
     } catch (error) {
         console.log(error);
-        return res.status(200).send({ message: 'Unknown error occured' });
+        res.status(500).send();
     }
 });
 
-router.get('/all', async function (req, res) {
-    try {
-        const users = await getUsers();
-
-        res.status(200).send({ message: 'Success', users: users });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: 'Unknown error occured' });
-    }
+router.get('/all', function (req, res) {
+    getUsers()
+        .then((users) => {
+            res.status(200).send({ users: users });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send();
+        });
 });
 
-router.put('/', async function (req, res) {
-    try {
-        const { userID, username, role } = req.body;
+router.put('/', function (req, res) {
+    const { userID, username, role } = req.body;
 
-        // * Validate user input
-        if (!username || !role) {
-            console.log('Incomplete data');
-            return res.status(400).send({ message: 'Incomplete data' });
-        }
-
-        try {
-            await updateUser(userID, username, role);
-            return res.status(200).send({ message: 'User updated' });
-        } catch (error) {
-            console.log(error);
-            return res.status(500).send({ message: 'Something went wrong' });
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).send({ message: 'Unknown error occured' });
+    if (!username || !role) {
+        console.log('Incomplete data');
+        return res.status(400).send();
     }
+
+    updateUser(userID, username, role)
+        .then(() => {
+            res.status(200).send();
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send();
+        });
 });
 
 router.post('/', async function (req, res) {
     try {
         const { username, role, password } = req.body;
 
-        // * Validate user input
         if (!username || !role || !password) {
             console.log('Incomplete data');
-            return res.status(200).send({ message: 'Incomplete data' });
+            return res.status(200).send();
         }
 
         const user = await getUserByName(username);
 
-        // * User not found => can be added
-        if (user == false || user == null) {
-            try {
-                await addUser(username, role, password);
-                return res.status(200).send({ message: 'User added' });
-            } catch (error) {
-                console.log(error);
-                return res
-                    .status(500)
-                    .send({ message: 'Something went wrong' });
-            }
-        }
-
-        return res.status(200).send({ message: 'User exists' });
+        if (user == false || user == null)
+            addUser(username, role, password)
+                .then(() => {
+                    res.status(200).send();
+                })
+                .catch((err) => {
+                    console.log(err);
+                    res.status(500).send();
+                });
     } catch (error) {
         console.log(error);
-        return res.status(200).send({ message: 'Unknown error occured' });
+        res.status(500).send();
     }
 });
 
 router.delete('/', async function (req, res) {
-    try {
-        const { userID } = req.body;
+    const { userID } = req.body;
 
-        // * Validate user input
-        if (!userID) {
-            console.log('No user ID');
-            return res.status(200).send({ message: 'No user ID' });
-        }
-
-        await deleteUser(userID);
-
-        return res.status(200).send({ message: 'Success' });
-    } catch (error) {
-        console.log(error);
-        return res.status(200).send({ message: 'Unknown error occured' });
+    if (!userID) {
+        console.log('No user ID');
+        return res.status(200).send();
     }
+
+    deleteUser(userID)
+        .then(() => {
+            res.status(200).send();
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send();
+        });
 });
 
 module.exports = router;

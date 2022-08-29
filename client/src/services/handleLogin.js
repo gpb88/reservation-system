@@ -3,19 +3,17 @@ import { verifyPass } from 'services/password';
 
 export async function handleLogin(userToCheck, rememberMe) {
     let authenticated = false;
-    let userFromDB = await getUserByName(userToCheck.username)
-        .then((response) => {
-            return response;
-        })
-        .catch((err) => {
-            console.error(err);
-        });
+    let userFromDB = await getUserByName(userToCheck.username).catch((err) => {
+        console.error(err);
+    });
 
     if (userFromDB) {
         authenticated = await verifyPass(
             userToCheck.password,
             userFromDB.u_password
-        );
+        ).catch((err) => {
+            console.error(err);
+        });
     }
 
     if (authenticated) {

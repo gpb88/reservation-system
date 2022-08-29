@@ -21,7 +21,6 @@ export default function Timetable() {
     const refreshClasses = () => {
         getClasses()
             .then((response) => {
-                console.log(new Date(response[0].start_time));
                 let newClasses = [];
                 response.forEach((_class) => {
                     let newClass = {};
@@ -34,16 +33,15 @@ export default function Timetable() {
 
                     newClasses.push(newClass);
                 });
+
                 setClasses(newClasses);
             })
-
             .catch((err) => {
                 console.error(err);
             });
     };
 
     const handleSelectEvent = (event) => {
-        console.log(event);
         setEvent(event);
         setOpen(true);
     };
@@ -68,7 +66,7 @@ export default function Timetable() {
                 events={classes}
                 startAccessor='start'
                 endAccessor='end'
-                style={{ height: '70vh' }}
+                style={{ height: '80vh' }}
                 onSelectEvent={handleSelectEvent}
             />
         </div>

@@ -3,6 +3,7 @@ import { Typography, Button, Container } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { getMachines } from 'API';
 import { FaPlus } from 'react-icons/fa';
+import 'styles/datagrid.css';
 import AddMachine from 'routes/Machines/AddMachine';
 import MachineCard from 'routes/Machines/MachineCard';
 
@@ -37,7 +38,7 @@ export default function Machines() {
         <Container
             id='machine-page'
             maxWidth='sm'
-            disableGutters={true}
+            disableGutters
             sx={{ display: 'grid', justifyItems: 'center' }}
         >
             <Typography variant='h4' component='h1' sx={{ mt: 6, mb: 4 }}>
@@ -64,7 +65,7 @@ export default function Machines() {
                     userSelect: 'none !important',
                     padding: 'none !important',
                 }}
-                autoHeight={true}
+                autoHeight
                 disableSelectionOnClick
                 disableColumnFilter
                 disableColumnMenu
