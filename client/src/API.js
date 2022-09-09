@@ -31,10 +31,11 @@ export async function getUserByID(userID) {
     return result;
 }
 
-export async function validateToken(token) {
+export async function validateToken(token, userID) {
     const result = await axios
         .post(baseUrl + '/token', {
             token: token,
+            userID: userID,
         })
         .then(function (response) {
             return response;
@@ -49,7 +50,7 @@ export async function validateToken(token) {
 export async function getToken(user) {
     const result = await axios
         .get(baseUrl + '/token', {
-            params: { username: user.username, role: user.role },
+            params: { userID: user.user_id },
         })
         .then(function (response) {
             return response.data.token;
@@ -283,17 +284,17 @@ export async function deleteClass(classID) {
 }
 
 export async function getCalendars() {
-	const result = await axios
-			.get(baseUrl + '/google/calendar')
-			.then(function (response) {
-					console.log(response)
-					return response.data.calendars;
-			})
-			.catch(function (error) {
-					console.error(error);
-			});
+    const result = await axios
+        .get(baseUrl + '/google/calendar')
+        .then(function (response) {
+            console.log(response);
+            return response.data.calendars;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
 
-	return result;
+    return result;
 }
 
 export async function createCalendar() {

@@ -3,11 +3,10 @@ const router = express.Router();
 const { validateToken, createToken } = require('services/token');
 
 router.post('/', function (req, res) {
-    const { token } = req.body;
+    const { token, userID } = req.body;
 
-    validateToken(token)
+    validateToken(token, userID)
         .then((isValid) => {
-            console.log(isValid);
             isValid ? res.status(200).send() : res.status(400).send();
         })
         .catch((err) => {
@@ -17,10 +16,10 @@ router.post('/', function (req, res) {
 });
 
 router.get('/', function (req, res) {
-    const { username, role } = req.query;
+    const { userID } = req.query;
 
     try {
-        let token = createToken(username, role);
+        let token = createToken(userID);
         res.status(200).send({ token: token });
     } catch (error) {
         console.log(error);

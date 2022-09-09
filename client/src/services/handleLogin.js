@@ -3,28 +3,28 @@ import { verifyPass } from 'services/password';
 
 export async function handleLogin(userToCheck, rememberMe) {
     let authenticated = false;
-    let userFromDB = await getUserByName(userToCheck.username).catch((err) => {
+    let userData = await getUserByName(userToCheck.username).catch((err) => {
         console.error(err);
     });
 
-    if (userFromDB) {
+    if (userData) {
         authenticated = await verifyPass(
             userToCheck.password,
-            userFromDB.u_password
+            userData.u_password
         ).catch((err) => {
             console.error(err);
         });
     }
 
     if (authenticated) {
-        await getToken(userToCheck)
+        await getToken(userData)
             .then((token) => {
                 if (rememberMe) {
                     localStorage.setItem('token', token);
-                    localStorage.setItem('user', userToCheck.username);
+                    localStorage.setItem('userID', userData.user_id);
                 } else {
                     sessionStorage.setItem('token', token);
-                    sessionStorage.setItem('user', userToCheck.username);
+                    sessionStorage.setItem('userID', userData.user_id);
                 }
             })
             .catch((err) => {
@@ -33,4 +33,11 @@ export async function handleLogin(userToCheck, rememberMe) {
     }
 
     return authenticated;
+}
+
+export function getUserID() {
+    let userID = localStorage.getItem('userID');
+    if (userID == null) userID = sessionStorage.getItem('userID');
+
+    return userID;
 }

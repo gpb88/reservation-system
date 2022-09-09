@@ -1,15 +1,13 @@
 import { validateToken } from 'API';
+import { getUserID } from 'services/handleLogin';
 
 export async function checkToken() {
-    // ? Check if user is already logged in (has valid token)
-    // ? if so, redirect to home
     let isValid = false;
-    let jwtToken = getToken();
+    const jwtToken = getToken();
+    const userID = getUserID();
 
-    console.log(jwtToken);
-
-    if (jwtToken) {
-        await validateToken(jwtToken)
+    if (jwtToken && userID) {
+        await validateToken(jwtToken, userID)
             .then((response) => {
                 if (response.status === 200) isValid = true;
             })

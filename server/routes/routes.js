@@ -1,3 +1,5 @@
+const auth = require('middleware/auth');
+
 const token = require('routes/v1/token');
 const user = require('routes/v1/user');
 const roles = require('routes/v1/roles');
@@ -9,11 +11,11 @@ const google = require('routes/v1/google');
 const version = 'v1';
 
 module.exports = function (app) {
-    app.use(`/${version}/user`, user);
-    app.use(`/${version}/roles`, roles);
-    app.use(`/${version}/token`, token);
-    app.use(`/${version}/machine`, machine);
-    app.use(`/${version}/permissions`, permissions);
-    app.use(`/${version}/class`, _class);
-    app.use(`/${version}/google`, google);
+    app.use(`/${version}/user`, auth, user);
+    app.use(`/${version}/roles`, auth, roles);
+    app.use(`/${version}/token`, auth, token);
+    app.use(`/${version}/machine`, auth, machine);
+    app.use(`/${version}/permissions`, auth, permissions);
+    app.use(`/${version}/class`, auth, _class);
+    app.use(`/${version}/google`, auth, google);
 };

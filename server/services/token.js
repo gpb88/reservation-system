@@ -1,26 +1,28 @@
 const jwt = require('jsonwebtoken');
 
-function createToken(username, role) {
+function createToken(userID) {
     const token = jwt.sign(
-        { username, role },
+        { userID },
         process.env.PRIVATE_KEY.replace(/\\n/g, '\n'),
         {
             algorithm: 'RS256',
-            expiresIn: '2h',
+            expiresIn: '1h',
         }
     );
 
     return token;
 }
 
-function validateToken(token) {
-    let isValid = null;
+async function validateToken(token, userID) {
+    let isValid = false;
 
     try {
-        isValid = jwt.verify(
+        const tokenData = jwt.verify(
             token,
             process.env.PUBLIC_KEY.replace(/\\n/g, '\n')
         );
+
+        if (Number(userID) === Number(tokenData.userID)) isValid = true;
     } catch (error) {
         // ? Token expired error
         console.log(error);

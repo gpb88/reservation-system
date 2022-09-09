@@ -6,9 +6,13 @@ import AddClass from 'routes/AddClass/AddClass';
 import Machines from 'routes/Machines/Machines';
 import Permissions from 'routes/Permissions/Permissions';
 import { useNavigate } from 'react-router-dom';
-import { clearStorage, getToken } from 'services/token';
-import { getUserByName } from 'API';
+import { clearStorage, checkToken } from 'services/token';
+import { getUserID } from 'services/handleLogin';
+import { getUserByID } from 'API';
 import { BiLogOut } from 'react-icons/bi';
+import { useSnackbar } from 'notistack';
+
+const tokenCheckInterval = 30;
 
 export default function Home() {
     let [user, setUser] = React.useState('');
@@ -16,38 +20,44 @@ export default function Home() {
 
     let [pageComponent, setPageComponent] = React.useState(<Timetable />);
 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
 
-    React.useEffect(() => {
-        let token = getToken();
-        if (token) {
-            let username = getUsername();
+    const { enqueueSnackbar } = useSnackbar();
 
-            getUserByName(username)
-                .then((user) => {
-                    setUser(user);
+    React.useEffect(() => [checkIfTokenExpired()], []);
 
-                    user.role == 'admin'
-                        ? setPages([
-                              'Timetable',
-                              'Add class',
-                              'Users',
-                              'Machines',
-                              'Permissions',
-                          ])
-                        : setPages(['Timetable', 'Add class']);
-                })
-                .catch((err) => {
-                    console.error(err);
-                });
-        } else logout();
+    React.useEffect(async () => {
+        let userID = getUserID();
+
+        getUserByID(userID)
+            .then((user) => {
+                setUser(user);
+
+                user.role == 'admin'
+                    ? setPages([
+                          'Timetable',
+                          'Add class',
+                          'Users',
+                          'Machines',
+                          'Permissions',
+                      ])
+                    : setPages(['Timetable', 'Add class']);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     }, []);
 
-    const getUsername = () => {
-        let username = localStorage.getItem('user');
-        if (username == null) username = sessionStorage.getItem('user');
+    const checkIfTokenExpired = async () => {
+        let isAuthorized = await checkToken();
 
-        return username;
+        if (!isAuthorized) {
+            enqueueSnackbar('Your token expired, you have been logged out', {
+                variant: 'warning',
+            });
+            clearTimeout(checkIfTokenExpired);
+            logout();
+        } else setTimeout(checkIfTokenExpired, tokenCheckInterval * 1000);
     };
 
     const logout = () => {

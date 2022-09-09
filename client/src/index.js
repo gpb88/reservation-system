@@ -40,7 +40,7 @@ const theme = createTheme({
 ReactDOM.render(
     <GoogleOAuthProvider clientId={process.env.REACT_APP_CLIENT_ID}>
         <BrowserRouter>
-            <SnackbarProvider maxSnack={3} autoHideDuration={2000}>
+            <SnackbarProvider maxSnack={3} autoHideDuration={5000}>
                 <ThemeProvider theme={theme}>
                     <App></App>
                 </ThemeProvider>
