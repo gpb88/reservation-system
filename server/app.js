@@ -12,7 +12,8 @@ const cors = require('cors');
 const app = express();
 
 // * Database connection and app start
-const { initDbConn } = require('services/dbController');
+const { connectToDB } = require('database/controller');
+const { syncDB } = require('database/methods');
 
 // * Middleware
 app.use(cors());
@@ -22,9 +23,10 @@ app.use(morgan('dev'));
 // * Routes
 require('routes/routes')(app);
 
-initDbConn()
+connectToDB()
     .then(() => {
         console.log('Connected to db');
+        syncDB();
 
         app.listen(PORT, function () {
             console.log(`Server listening on port ${PORT}`);

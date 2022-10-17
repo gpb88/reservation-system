@@ -283,6 +283,20 @@ export async function deleteClass(classID) {
     return result;
 }
 
+export async function getGoogleAuthURL() {
+    const result = await axios
+        .get(baseUrl + '/google/authorize')
+        .then(function (response) {
+            console.log(response);
+            return response.data.url;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
 export async function getCalendars() {
     const result = await axios
         .get(baseUrl + '/google/calendar')
@@ -310,10 +324,13 @@ export async function createCalendar() {
     return result;
 }
 
-export async function uploadToGoogleCalendar(events) {
+export async function uploadToGoogleCalendar(userID, summary, start, end) {
     const result = await axios
-        .post(baseUrl + '/google/event/batch', {
-            events: events,
+        .post(baseUrl + '/google/event', {
+            userID: userID,
+            summary: summary,
+            start: start,
+            end: end,
         })
         .then(function (response) {
             return response.data;
@@ -342,7 +359,39 @@ export async function getEventColors() {
     const result = await axios
         .get(baseUrl + '/google/event/colors')
         .then(function (response) {
+            console.log(response.data.colors);
             return response.data.colors;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function getSettings(userID) {
+    const result = await axios
+        .get(baseUrl + '/settings', {
+            params: { userID: userID },
+        })
+        .then(function (response) {
+            return response.data.settings;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function saveSettings(userID, settings) {
+    const result = await axios
+        .post(baseUrl + '/settings', {
+            userID: userID,
+            settings: settings,
+        })
+        .then(function (response) {
+            return response;
         })
         .catch(function (error) {
             console.error(error);

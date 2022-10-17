@@ -14,15 +14,17 @@ import {
     uploadToGoogleCalendar,
     createCalendar,
     getCalendars,
+    getGoogleAuthURL,
 } from 'API';
 import 'styles/event-card.css';
 import { useSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 
 export default function Timetable(props) {
     const [user, setUser] = React.useState('');
     const [machine, setMachine] = React.useState('');
-    const [timeZone, setTimeZone] = React.useState('Europe/Warsaw');
 
+    let navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
 
     React.useEffect(() => {
@@ -52,24 +54,7 @@ export default function Timetable(props) {
             });
     };
 
-    const handleUploadToGoogleCalendar = () => {
-        const event = {
-            summary: props.event.title,
-            // description: 'Test description',
-            start: {
-                dateTime: props.event.start,
-                timeZone: timeZone,
-            },
-            end: {
-                dateTime: props.event.end,
-                timezone: timeZone,
-            },
-            colorId: 1,
-        };
-
-        let eventsArr = [];
-        eventsArr.push(event);
-
+    const handleUploadToGoogleCalendar = async () => {
         // createCalendar().catch((err) => {
         //     enqueueSnackbar('Error occurred', {
         //         variant: 'error',
@@ -77,23 +62,29 @@ export default function Timetable(props) {
         //     console.error(err);
         // });
 
-        getCalendars().then((response) => {
-            console.log(response);
-        });
+        // getCalendars().then((response) => {
+        //     console.log(response);
+        // });
+        navigate('/googleauth');
 
-        uploadToGoogleCalendar(eventsArr)
-            .then((response) => {
-                enqueueSnackbar('Event has been added to your calendar!', {
-                    variant: 'success',
-                });
-                console.log(response);
-            })
-            .catch((err) => {
-                enqueueSnackbar('Error occurred', {
-                    variant: 'error',
-                });
-                console.error(err);
-            });
+        // uploadToGoogleCalendar(
+        //     props.event.userID,
+        //     props.event.title,
+        //     props.event.start,
+        //     props.event.end
+        // )
+        //     .then((response) => {
+        //         enqueueSnackbar('Event has been added to your calendar!', {
+        //             variant: 'success',
+        //         });
+        //         console.log(response);
+        //     })
+        //     .catch((err) => {
+        //         enqueueSnackbar('Error occurred', {
+        //             variant: 'error',
+        //         });
+        //         console.error(err);
+        //     });
     };
 
     return (

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getRoles } = require('services/dbController');
+const { getRoles } = require('database/methods');
 
 router.get('/', function (req, res) {
     getRoles()

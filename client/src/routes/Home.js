@@ -1,24 +1,39 @@
 import * as React from 'react';
-import { AppBar, Toolbar, Typography, Container, Button } from '@mui/material';
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    Container,
+    Button,
+    Avatar,
+    Menu,
+    MenuItem,
+    ListItemIcon,
+    Divider,
+    Box,
+} from '@mui/material';
+import { Settings, Logout } from '@mui/icons-material';
 import Users from 'routes/Users/Users';
 import Timetable from 'routes/Timetable/Timetable';
 import AddClass from 'routes/AddClass/AddClass';
 import Machines from 'routes/Machines/Machines';
 import Permissions from 'routes/Permissions/Permissions';
+import MyAccount from 'routes/MyAccount/MyAccount';
+import UserSettings from 'routes/UserSettings/UserSettings';
 import { useNavigate } from 'react-router-dom';
 import { clearStorage, checkToken } from 'services/token';
 import { getUserID } from 'services/handleLogin';
-import { getUserByID } from 'API';
-import { BiLogOut } from 'react-icons/bi';
 import { useSnackbar } from 'notistack';
+import { getUserByID } from 'API';
 
 const tokenCheckInterval = 30;
 
 export default function Home() {
-    let [user, setUser] = React.useState('');
-    let [pages, setPages] = React.useState([]);
-
-    let [pageComponent, setPageComponent] = React.useState(<Timetable />);
+    const [user, setUser] = React.useState('');
+    const [pages, setPages] = React.useState([]);
+    const [pageComponent, setPageComponent] = React.useState(<Timetable />);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const isMenuOpen = Boolean(anchorEl);
 
     const navigate = useNavigate();
 
@@ -82,6 +97,12 @@ export default function Home() {
             case 'Machines':
                 setPageComponent(<Machines />);
                 break;
+            case 'My Account':
+                setPageComponent(<MyAccount user={user} />);
+                break;
+            case 'User Settings':
+                setPageComponent(<UserSettings user={user} />);
+                break;
             default:
                 setPageComponent(<Timetable />);
                 break;
@@ -136,28 +157,96 @@ export default function Home() {
                                 </Button>
                             ))}
                         </Container>
-                        <Button
-                            onClick={() => logout()}
+                        <Box
+                            onClick={(event) => {
+                                anchorEl === null
+                                    ? setAnchorEl(event.currentTarget)
+                                    : setAnchorEl(null);
+                            }}
                             sx={{
-                                color: '#000',
-                                display: 'flex',
-                                textTransform: 'none',
-                                backgroundColor: '#fff',
                                 '&:hover': {
-                                    backgroundColor: '#fff',
-                                    textDecoration: 'underline',
+                                    cursor: 'pointer',
                                 },
                             }}
                         >
-                            <BiLogOut size='1.2em' />
-                            <Typography
-                                sx={{
-                                    pl: 1,
+                            <Avatar />
+                        </Box>
+                        <Menu
+                            anchorEl={anchorEl}
+                            open={isMenuOpen}
+                            onClose={() => {
+                                setAnchorEl(null);
+                            }}
+                            PaperProps={{
+                                elevation: 0,
+                                sx: {
+                                    overflow: 'visible',
+                                    filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                    mt: 1.5,
+                                    '& .MuiAvatar-root': {
+                                        width: 32,
+                                        height: 32,
+                                        ml: -0.5,
+                                        mr: 1,
+                                    },
+                                    // ? Arrow poinitng upwards
+                                    '&:before': {
+                                        content: '""',
+                                        display: 'block',
+                                        position: 'absolute',
+                                        top: 0,
+                                        right: 14,
+                                        width: 10,
+                                        height: 10,
+                                        bgcolor: 'background.paper',
+                                        transform:
+                                            'translateY(-50%) rotate(45deg)',
+                                        zIndex: 0,
+                                    },
+                                },
+                            }}
+                            transformOrigin={{
+                                horizontal: 'right',
+                                vertical: 'top',
+                            }}
+                            anchorOrigin={{
+                                horizontal: 'right',
+                                vertical: 'bottom',
+                            }}
+                            disableAutoFocusItem
+                        >
+                            <MenuItem
+                                onClick={() => {
+                                    setAnchorEl(null);
+                                    switchPage('My Account');
                                 }}
                             >
-                                Log out
-                            </Typography>
-                        </Button>
+                                <Avatar /> My account
+                            </MenuItem>
+                            <Divider />
+                            <MenuItem
+                                onClick={() => {
+                                    setAnchorEl(null);
+                                    switchPage('User Settings');
+                                }}
+                            >
+                                <ListItemIcon>
+                                    <Settings fontSize='small' />
+                                </ListItemIcon>
+                                Settings
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    setAnchorEl(null);
+                                    logout();
+                                }}
+                            >
+                                <ListItemIcon>
+                                    <Logout fontSize='small' />
+                                </ListItemIcon>
+                                Logout
+                            </MenuItem>
+                        </Menu>
                     </Toolbar>
                 </Container>
             </AppBar>

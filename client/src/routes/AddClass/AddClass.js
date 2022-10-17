@@ -7,14 +7,12 @@ import {
     MenuItem,
     Container,
     Select,
-    Box,
 } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'styles/add-class.css';
-import { getClasses, addClass, getPermissions, getEventColors } from 'API';
+import { getClasses, addClass, getPermissions } from 'API';
 import { useSnackbar } from 'notistack';
-import { CirclePicker } from 'react-color';
 
 export default function AddClass(props) {
     const [title, setTitle] = React.useState('My Event');
@@ -23,40 +21,35 @@ export default function AddClass(props) {
     const [classes, setClasses] = React.useState([]);
     const [machine, setMachine] = React.useState('');
     const [machines, setMachines] = React.useState([]);
-    const [colorID, setColorID] = React.useState('');
-    const [colors, setColors] = React.useState([]);
 
     const { enqueueSnackbar } = useSnackbar();
 
     React.useEffect(() => {
-        getClasses().then((response) => {
-            let newClasses = [];
+        getClasses()
+            .then((response) => {
+                let newClasses = [];
 
-            response.forEach((_class) => {
-                let newClass = {};
-                newClass.start = new Date(_class.start_time);
-                newClass.end = new Date(_class.end_time);
+                response.forEach((_class) => {
+                    let newClass = {};
+                    newClass.start = new Date(_class.start_time);
+                    newClass.end = new Date(_class.end_time);
 
-                newClasses.push(newClass);
+                    newClasses.push(newClass);
+                });
+
+                setClasses(newClasses);
+            })
+            .catch((err) => {
+                console.log(err);
             });
 
-            setClasses(newClasses);
-        });
-
-        getPermissions(props.user.user_id).then((response) => {
-            setMachines(response);
-        });
-
-        getEventColors().then((response) => {
-            let objArr = Object.values(response);
-            let colorArr = [];
-            objArr.forEach((obj) => {
-                colorArr.push(obj.background);
+        getPermissions(props.user.user_id)
+            .then((response) => {
+                setMachines(response);
+            })
+            .catch((err) => {
+                console.log(err);
             });
-
-            setColors(colorArr);
-            setColorID(0);
-        });
     }, []);
 
     const handleChangeMachine = (event) => {
@@ -78,7 +71,7 @@ export default function AddClass(props) {
             new Date(endTime),
             machine
         )
-            .then((response) => {
+            .then(() => {
                 return enqueueSnackbar('Class successfully added', {
                     variant: 'success',
                 });
@@ -141,10 +134,6 @@ export default function AddClass(props) {
         return isAvailable;
     };
 
-    const handleColorChange = (color) => {
-        setColorID(colors.indexOf(color.hex));
-    };
-
     const times = [];
     for (let i = 7; i <= 22; i++) {
         for (let j = 0; j < 4; j++) {
@@ -178,16 +167,6 @@ export default function AddClass(props) {
                         alignItems: 'center',
                     }}
                 >
-                    <Box
-                        disableGutters
-                        sx={{
-                            width: '1.4em',
-                            height: '1.4em',
-                            backgroundColor: colors[colorID],
-                            mx: 2,
-                            borderRadius: '50%',
-                        }}
-                    />
                     <Typography
                         sx={{ width: '60%', textAlign: 'left' }}
                         variant='h6'
@@ -217,48 +196,6 @@ export default function AddClass(props) {
                             setTitle(e.target.value);
                         }}
                     />
-                </Grid>
-
-                <Grid
-                    item
-                    xs={12}
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
-                >
-                    <Typography
-                        sx={{ width: '60%', textAlign: 'left' }}
-                        variant='h6'
-                        align='center'
-                    >
-                        Color
-                    </Typography>
-                </Grid>
-
-                <Grid
-                    item
-                    xs={12}
-                    sx={{
-                        justifySelf: 'center',
-                        display: 'flex',
-                        alignItems: 'center',
-                    }}
-                >
-                    <Container
-                        sx={{
-                            width: '60%',
-                        }}
-                        disableGutters
-                    >
-                        <CirclePicker
-                            onChange={handleColorChange}
-                            className='circle-picker'
-                            colors={colors}
-                            width='60%'
-                        />
-                    </Container>
                 </Grid>
 
                 <Grid
@@ -429,9 +366,9 @@ export default function AddClass(props) {
                     <Button
                         variant='contained'
                         sx={{
-                            fontSize: '25px',
-                            margin: '20px',
-                            width: '300px',
+                            fontSize: '18px',
+                            my: 6,
+                            width: '100px',
                         }}
                         onClick={handleAddClass}
                     >

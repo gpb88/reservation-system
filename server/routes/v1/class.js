@@ -5,7 +5,8 @@ const {
     getClassesForUser,
     addClass,
     deleteClass,
-} = require('services/dbController');
+		getSetting
+} = require('database/methods');
 
 router.get('/all', function (req, res) {
     getClasses()

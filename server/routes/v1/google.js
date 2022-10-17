@@ -1,20 +1,41 @@
 const express = require('express');
 const router = express.Router();
+const { getSetting } = require('database/methods');
 const { google } = require('googleapis');
-
-const oAuth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET
-);
-
-oAuth2Client.setCredentials({
-    refresh_token: process.env.OAUTH_REFRESH_TOKEN,
-    access_token: process.env.OAUTH_ACCESS_TOKEN,
-});
 
 let calendarName = 'AGH Calendar';
 
-const googleCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.REDIRECT_URL
+);
+
+const scopes = ['https://www.googleapis.com/auth/calendar'];
+
+// const { tokens } = async () => await oauth2Client.getToken(code);
+// oauth2Client.setCredentials(tokens);
+// oauth2Client.on('tokens', (tokens) => {
+//     if (tokens.refresh_token) {
+//         // store the refresh_token in my database!
+//         console.log(tokens.refresh_token);
+//     }
+//     console.log(tokens.access_token);
+// });
+
+const googleCalendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+router.get('/authorize', function (req, res) {
+    const url = oauth2Client.generateAuthUrl({
+        // 'online' (default) or 'offline' (gets refresh_token)
+        access_type: 'offline',
+
+        // If you only need one scope you can pass it as a string
+        scope: scopes,
+    });
+
+    res.status(200).send({ url: url });
+});
 
 router.get('/calendar/colors', function (req, res) {
     googleCalendar.colors
@@ -40,37 +61,60 @@ router.get('/event/colors', function (req, res) {
         });
 });
 
-router.post('/event/batch', function (req, res) {
-    let { events } = req.body;
+router.post('/event', async function (req, res) {
+    let { userID, summary, start, end } = req.body;
 
-    events.forEach(async (event) => {
-        // ? Freebusy query - not sure if needed?
-        // let eventsArr = await calendar.freebusy
-        //     .query({
-        //         resource: {
-        //             timeMin: event.start.dateTime,
-        //             timeMax: event.end.dateTime,
-        //             timeZone: 'Europe/Warsaw',
-        //             items: [{ id: 'primary' }],
-        //         },
-        //     })
-        //     .then((response) => {
-        //         return response.data.calendars.primary.busy;
-        //     })
-        //     .catch((err) => {
-        //         console.log(err);
-        //     });
+    const colorID = await getSetting(userID, 'google_event_color');
+    const addEventsToSeparateCalendar = await getSetting(
+        userID,
+        'add_events_to_separate_calendar'
+    );
+    const timeZone = 'Europe/Warsaw';
 
-        // if (eventsArr.length === 0)
-        googleCalendar.events
-            .insert({ calendarId: 'primary', resource: event })
-            .then(() => {
-                console.log('Event added');
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    });
+    console.log(colorID);
+
+    const event = {
+        summary: summary,
+        // description: 'Test description',
+        start: {
+            dateTime: start,
+            timeZone: timeZone,
+        },
+        end: {
+            dateTime: end,
+            timeZone: timeZone,
+        },
+        colorId: Number(colorID) + 1,
+    };
+
+    // events.forEach(async (event) => {
+    //     // ? Freebusy query - not sure if needed?
+    //     // let eventsArr = await calendar.freebusy
+    //     //     .query({
+    //     //         resource: {
+    //     //             timeMin: event.start.dateTime,
+    //     //             timeMax: event.end.dateTime,
+    //     //             timeZone: 'Europe/Warsaw',
+    //     //             items: [{ id: 'primary' }],
+    //     //         },
+    //     //     })
+    //     //     .then((response) => {
+    //     //         return response.data.calendars.primary.busy;
+    //     //     })
+    //     //     .catch((err) => {
+    //     //         console.log(err);
+    //     //     });
+
+    //     // if (eventsArr.length === 0)
+    googleCalendar.events
+        .insert({ calendarId: 'primary', resource: event })
+        .then(() => {
+            console.log('Event added');
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+    // });
 
     res.status(200).send();
 });

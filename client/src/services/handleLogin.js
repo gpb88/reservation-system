@@ -10,7 +10,7 @@ export async function handleLogin(userToCheck, rememberMe) {
     if (userData) {
         authenticated = await verifyPass(
             userToCheck.password,
-            userData.u_password
+            userData.password
         ).catch((err) => {
             console.error(err);
         });
@@ -21,10 +21,10 @@ export async function handleLogin(userToCheck, rememberMe) {
             .then((token) => {
                 if (rememberMe) {
                     localStorage.setItem('token', token);
-                    localStorage.setItem('userID', userData.user_id);
+                    localStorage.setItem('userID', userData.id);
                 } else {
                     sessionStorage.setItem('token', token);
-                    sessionStorage.setItem('userID', userData.user_id);
+                    sessionStorage.setItem('userID', userData.id);
                 }
             })
             .catch((err) => {

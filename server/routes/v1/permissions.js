@@ -4,7 +4,7 @@ const {
     getPermisions,
     addPermission,
     revokePermission,
-} = require('services/dbController');
+} = require('database/methods');
 
 router.get('/', function (req, res) {
     const { userID } = req.query;

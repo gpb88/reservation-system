@@ -7,7 +7,9 @@ const {
     addUser,
     deleteUser,
     updateUser,
-} = require('services/dbController');
+    addDefaultSettings,
+} = require('database/methods');
+const { defaultSettings } = require('services/defaultSettings');
 
 router.get('/', async function (req, res) {
     try {
@@ -26,8 +28,8 @@ router.get('/', async function (req, res) {
             console.log('User not found');
             return res.status(400).send();
         }
-
-        res.status(200).send({ user: user });
+				
+        res.status(200).send({ user: user.dataValues });
     } catch (error) {
         console.log(error);
         res.status(500).send();
@@ -73,9 +75,20 @@ router.post('/', async function (req, res) {
         }
 
         const user = await getUserByName(username);
+        console.log(user);
 
-        if (user == false || user == null)
-            addUser(username, role, password)
+        if (user == false || user == null) {
+            await addUser(username, role, password).catch((err) => {
+                console.log(err);
+                res.status(500).send();
+            });
+
+            let newUser = await getUserByName(username).catch((err) => {
+                console.log(err);
+                res.status(500).send();
+            });
+
+            await addDefaultSettings(newUser.user_id, defaultSettings)
                 .then(() => {
                     res.status(200).send();
                 })
@@ -83,6 +96,7 @@ router.post('/', async function (req, res) {
                     console.log(err);
                     res.status(500).send();
                 });
+        }
     } catch (error) {
         console.log(error);
         res.status(500).send();

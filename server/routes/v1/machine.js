@@ -7,7 +7,7 @@ const {
     addMachine,
     deleteMachine,
     updateMachine,
-} = require('services/dbController');
+} = require('database/methods');
 
 router.get('/', function (req, res) {
     const { machineID } = req.query;

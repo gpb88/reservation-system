@@ -7,7 +7,9 @@
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.19",
-    "pg": "^8.7.1",
-    "rootpath": "^0.1.2"
+    "pg": "^8.8.0",
+    "pg-hstore": "^2.3.4",
+    "rootpath": "^0.1.2",
+    "sequelize": "^6.25.2"
   }
 }
