@@ -13,7 +13,7 @@ import { deleteMachine, updateMachine } from 'API';
 import { useSnackbar } from 'notistack';
 
 export default function MachineCard(props) {
-    const [name, setName] = React.useState(props.machine.machine_name);
+    const [name, setName] = React.useState(props.machine.name);
     const [description, setDescription] = React.useState(
         props.machine.description
     );
@@ -21,7 +21,7 @@ export default function MachineCard(props) {
     const { enqueueSnackbar } = useSnackbar();
 
     const handleUpdateMachine = () => {
-        updateMachine(props.machine.machine_id, name, description)
+        updateMachine(props.machine.id, name, description)
             .then((response) => {
                 enqueueSnackbar('Machine has been updated!', {
                     variant: 'success',

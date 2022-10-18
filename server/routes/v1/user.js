@@ -28,8 +28,8 @@ router.get('/', async function (req, res) {
             console.log('User not found');
             return res.status(400).send();
         }
-				
-        res.status(200).send({ user: user.dataValues });
+
+        res.status(200).send({ user: user });
     } catch (error) {
         console.log(error);
         res.status(500).send();
@@ -75,27 +75,12 @@ router.post('/', async function (req, res) {
         }
 
         const user = await getUserByName(username);
-        console.log(user);
 
         if (user == false || user == null) {
             await addUser(username, role, password).catch((err) => {
                 console.log(err);
                 res.status(500).send();
             });
-
-            let newUser = await getUserByName(username).catch((err) => {
-                console.log(err);
-                res.status(500).send();
-            });
-
-            await addDefaultSettings(newUser.user_id, defaultSettings)
-                .then(() => {
-                    res.status(200).send();
-                })
-                .catch((err) => {
-                    console.log(err);
-                    res.status(500).send();
-                });
         }
     } catch (error) {
         console.log(error);

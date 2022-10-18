@@ -18,6 +18,7 @@ const Role = sequelize.define(
     },
     {
         tableName: 'roles',
+        timestamps: false,
     }
 );
 
@@ -50,17 +51,9 @@ const User = sequelize.define(
     },
     {
         tableName: 'users',
+        timestamps: false,
     }
 );
-
-Role.hasOne(User, {
-    foreignKey: 'role',
-    targetKey: 'name',
-});
-User.belongsTo(Role, {
-    foreignKey: 'role',
-    targetKey: 'name',
-});
 
 const Machine = sequelize.define(
     'Machine',
@@ -79,10 +72,11 @@ const Machine = sequelize.define(
             type: DataTypes.STRING,
             allowNull: true,
         },
-        localization: { type: DataTypes.STRING, allowNull: true },
+        location: { type: DataTypes.STRING, allowNull: true },
     },
     {
         tableName: 'machines',
+        timestamps: false,
     }
 );
 
@@ -119,35 +113,38 @@ const Class = sequelize.define(
     },
     {
         tableName: 'classes',
+        timestamps: false,
     }
 );
 
 const Permission = sequelize.define(
     'Permission',
-    {
-        user_id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            allowNull: false,
-            references: {
-                model: User,
-                key: 'id',
-            },
-        },
-        machine_id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            allowNull: false,
-            references: {
-                model: Machine,
-                key: 'id',
-            },
-        },
-    },
+    {},
     {
         tableName: 'permissions',
+        timestamps: false,
     }
 );
+
+User.belongsToMany(Machine, {
+    through: Permission,
+    foreignKey: 'user_id',
+    targetKey: 'id',
+});
+Machine.belongsToMany(User, {
+    through: Permission,
+    foreignKey: 'machine_id',
+    targetKey: 'id',
+});
+
+Role.hasOne(User, {
+    foreignKey: 'role',
+    targetKey: 'name',
+});
+User.belongsTo(Role, {
+    foreignKey: 'role',
+    targetKey: 'name',
+});
 
 module.exports = {
     User,

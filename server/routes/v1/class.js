@@ -2,10 +2,8 @@ const express = require('express');
 const router = express.Router();
 const {
     getClasses,
-    getClassesForUser,
     addClass,
     deleteClass,
-		getSetting
 } = require('database/methods');
 
 router.get('/all', function (req, res) {
@@ -20,9 +18,9 @@ router.get('/all', function (req, res) {
 });
 
 router.post('/', function (req, res) {
-    let { userID, title, startTime, endTime, machineID } = req.body;
+    let { userID, machineID, title, startTime, endTime } = req.body;
 
-    addClass(userID, title, startTime, endTime, machineID)
+    addClass(userID, machineID, title, startTime, endTime)
         .then(() => {
             res.status(200).send();
         })
@@ -30,36 +28,6 @@ router.post('/', function (req, res) {
             console.log(err);
             res.status(500).send();
         });
-    // function dateRangeOverlaps(a_start, a_end, b_start, b_end) {
-    //     if (a_start <= b_start && b_start <= a_end) return true;
-    //     if (a_start <= b_end && b_end <= a_end) return true;
-    //     if (b_start < a_start && a_end < b_end) return true;
-    //     return false;
-    // }
-
-    // const classes = await getClassesForUser(userID);
-    // let i = 0;
-    // let len = classes.length;
-    // let datesOverlap = false;
-    // while (i < len) {
-    //     let a_start = new Date(startTime).getTime();
-    //     let a_end = new Date(endTime).getTime();
-    //     let b_start = new Date(classes[i].start_time).getTime();
-    //     let b_end = new Date(classes[i].end_time).getTime();
-
-    //     if (dateRangeOverlaps(a_start, a_end, b_start, b_end)) {
-    //         datesOverlap = true;
-    //         break;
-    //     }
-    //     i++;
-    // }
-
-    // if (datesOverlap) {
-    //     return res
-    //         .status(200)
-    //         .send({ message: 'Class exists', overlaps: true });
-    // } else {
-    // }
 });
 
 router.delete('/', function (req, res) {

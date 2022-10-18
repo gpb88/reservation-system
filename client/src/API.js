@@ -50,7 +50,7 @@ export async function validateToken(token, userID) {
 export async function getToken(user) {
     const result = await axios
         .get(baseUrl + '/token', {
-            params: { userID: user.user_id },
+            params: { userID: user.id },
         })
         .then(function (response) {
             return response.data.token;
@@ -251,14 +251,14 @@ export async function getClasses() {
     return result;
 }
 
-export async function addClass(userID, title, startTime, endTime, machineID) {
+export async function addClass(userID, machineID, title, startTime, endTime) {
     const result = await axios
         .post(baseUrl + '/class', {
             userID: userID,
+            machineID: machineID,
             title: title,
             startTime: startTime,
             endTime: endTime,
-            machineID: machineID,
         })
         .then(function (response) {
             return response.data;
@@ -285,10 +285,24 @@ export async function deleteClass(classID) {
 
 export async function getGoogleAuthURL() {
     const result = await axios
-        .get(baseUrl + '/google/authorize')
+        .get(baseUrl + '/google/authorize/url')
         .then(function (response) {
-            console.log(response);
             return response.data.url;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function sendGoogleAuthCode(accessCode) {
+    const result = await axios
+        .post(baseUrl + '/google/authorize/code', {
+            accessCode: accessCode,
+        })
+        .then(function (response) {
+            return response.data;
         })
         .catch(function (error) {
             console.error(error);
@@ -324,10 +338,9 @@ export async function createCalendar() {
     return result;
 }
 
-export async function uploadToGoogleCalendar(userID, summary, start, end) {
+export async function uploadToGoogleCalendar(summary, start, end) {
     const result = await axios
         .post(baseUrl + '/google/event', {
-            userID: userID,
             summary: summary,
             start: start,
             end: end,

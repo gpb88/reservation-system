@@ -3,29 +3,16 @@ const router = express.Router();
 const { getSetting } = require('database/methods');
 const { google } = require('googleapis');
 
-let calendarName = 'AGH Calendar';
-
+const calendarName = 'AGH Calendar';
 const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
     process.env.REDIRECT_URL
 );
-
 const scopes = ['https://www.googleapis.com/auth/calendar'];
+let googleCalendar = null;
 
-// const { tokens } = async () => await oauth2Client.getToken(code);
-// oauth2Client.setCredentials(tokens);
-// oauth2Client.on('tokens', (tokens) => {
-//     if (tokens.refresh_token) {
-//         // store the refresh_token in my database!
-//         console.log(tokens.refresh_token);
-//     }
-//     console.log(tokens.access_token);
-// });
-
-const googleCalendar = google.calendar({ version: 'v3', auth: oauth2Client });
-
-router.get('/authorize', function (req, res) {
+router.get('/authorize/url', function (req, res) {
     const url = oauth2Client.generateAuthUrl({
         // 'online' (default) or 'offline' (gets refresh_token)
         access_type: 'offline',
@@ -37,42 +24,25 @@ router.get('/authorize', function (req, res) {
     res.status(200).send({ url: url });
 });
 
-router.get('/calendar/colors', function (req, res) {
-    googleCalendar.colors
-        .get()
-        .then((colors) => {
-            res.status(200).send({ colors: colors.data.calendar });
-        })
-        .catch((err) => {
-            console.log(err);
-            res.status(500).send();
-        });
-});
+router.post('/authorize/code', async function (req, res) {
+    let { accessCode } = req.body;
 
-router.get('/event/colors', function (req, res) {
-    googleCalendar.colors
-        .get()
-        .then((colors) => {
-            res.status(200).send({ colors: colors.data.event });
-        })
-        .catch((err) => {
-            console.log(err);
-            res.status(500).send();
-        });
+    const { tokens } = await oauth2Client.getToken(accessCode);
+    oauth2Client.setCredentials(tokens);
+
+    googleCalendar = google.calendar({
+        version: 'v3',
+        auth: oauth2Client,
+    });
+
+    res.status(200).send();
 });
 
 router.post('/event', async function (req, res) {
-    let { userID, summary, start, end } = req.body;
+    let { summary, start, end } = req.body;
 
-    const colorID = await getSetting(userID, 'google_event_color');
-    const addEventsToSeparateCalendar = await getSetting(
-        userID,
-        'add_events_to_separate_calendar'
-    );
     const timeZone = 'Europe/Warsaw';
-
-    console.log(colorID);
-
+    const colorID = 1;
     const event = {
         summary: summary,
         // description: 'Test description',
@@ -84,39 +54,19 @@ router.post('/event', async function (req, res) {
             dateTime: end,
             timeZone: timeZone,
         },
-        colorId: Number(colorID) + 1,
+        colorId: colorID,
     };
 
-    // events.forEach(async (event) => {
-    //     // ? Freebusy query - not sure if needed?
-    //     // let eventsArr = await calendar.freebusy
-    //     //     .query({
-    //     //         resource: {
-    //     //             timeMin: event.start.dateTime,
-    //     //             timeMax: event.end.dateTime,
-    //     //             timeZone: 'Europe/Warsaw',
-    //     //             items: [{ id: 'primary' }],
-    //     //         },
-    //     //     })
-    //     //     .then((response) => {
-    //     //         return response.data.calendars.primary.busy;
-    //     //     })
-    //     //     .catch((err) => {
-    //     //         console.log(err);
-    //     //     });
-
-    //     // if (eventsArr.length === 0)
     googleCalendar.events
         .insert({ calendarId: 'primary', resource: event })
-        .then(() => {
+        .then((response) => {
             console.log('Event added');
+            res.status(200).send();
         })
         .catch((err) => {
             console.log(err);
+            res.status(500).send();
         });
-    // });
-
-    res.status(200).send();
 });
 
 router.get('/calendar', function (req, res) {

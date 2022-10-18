@@ -43,7 +43,7 @@ export default function AddClass(props) {
                 console.log(err);
             });
 
-        getPermissions(props.user.user_id)
+        getPermissions(props.user.id)
             .then((response) => {
                 setMachines(response);
             })
@@ -65,11 +65,11 @@ export default function AddClass(props) {
         }
 
         addClass(
-            props.user.user_id,
+            props.user.id,
+            machine,
             title,
             new Date(startTime),
-            new Date(endTime),
-            machine
+            new Date(endTime)
         )
             .then(() => {
                 return enqueueSnackbar('Class successfully added', {
@@ -343,11 +343,8 @@ export default function AddClass(props) {
                             sx={{ width: '100%' }}
                         >
                             {machines.map((machine, index) => (
-                                <MenuItem
-                                    key={index}
-                                    value={machine.machine_id}
-                                >
-                                    {machine.machine_name}
+                                <MenuItem key={index} value={machine.id}>
+                                    {machine.name}
                                 </MenuItem>
                             ))}
                         </Select>

@@ -73,7 +73,7 @@ export default function PermissionPage() {
 
         newMachines.forEach((machine) => {
             permitedMachines.forEach((permitedMachine) => {
-                if (machine.machine_id === permitedMachine.machine_id)
+                if (machine.id === permitedMachine.id)
                     machine.hasPermission = true;
             });
         });
@@ -83,7 +83,7 @@ export default function PermissionPage() {
     const updatePermission = (machineToUpdate, permission) => {
         let newMachines = machines;
         let targetMachine = newMachines.find(
-            (machine) => machine.machine_id === machineToUpdate.machine_id
+            (machine) => machine.id === machineToUpdate.id
         );
 
         targetMachine.hasPermission = permission;
@@ -136,9 +136,9 @@ export default function PermissionPage() {
                         onChange={handleUserChange}
                         value={userID}
                     >
-                        {users.map((u) => (
-                            <MenuItem key={u.user_id} value={u.user_id}>
-                                {u.username}
+                        {users.map((user) => (
+                            <MenuItem key={user.id} value={user.id}>
+                                {user.username}
                             </MenuItem>
                         ))}
                     </Select>
@@ -159,7 +159,7 @@ export default function PermissionPage() {
                     {userID
                         ? machines.map((machine) => (
                               <Grid
-                                  key={machine.machine_id}
+                                  key={machine.id}
                                   container
                                   sx={{
                                       p: 2,
@@ -183,7 +183,7 @@ export default function PermissionPage() {
                                           }}
                                           align='center'
                                       >
-                                          {machine.machine_name}
+                                          {machine.name}
                                       </Typography>
                                   </Grid>
                                   <Grid

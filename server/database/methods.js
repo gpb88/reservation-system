@@ -1,6 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const { sequelize } = require('database/controller');
-const { User, Role } = require('database/models');
+const { User, Role, Machine, Class, Permission } = require('database/models');
 
 async function createDefaults() {
     // ? Create default roles
@@ -17,12 +17,71 @@ async function createDefaults() {
     const users = await User.findAll();
 
     if (users.length === 0) {
-        await User.create({
-            username: 'admin',
-            password:
-                '$2a$12$q9g.oOA9NiirdGMCi4X6QOg2aWhDKn9hvZSMgr5kbRRSALyomUmme',
-            role: 'admin',
-        });
+        await User.bulkCreate([
+            {
+                username: 'admin',
+                password:
+                    '$2a$12$q9g.oOA9NiirdGMCi4X6QOg2aWhDKn9hvZSMgr5kbRRSALyomUmme',
+                role: 'admin',
+            },
+            {
+                username: 'user',
+                password:
+                    '$2a$12$TaC88Ae0NEVdLx/t9PFMX.Xhti6.9aTJFgamUBiTsZPV7gLRAy2iq',
+                role: 'user',
+            },
+        ]);
+    }
+
+    // ? Create default machines
+    const machines = await Machine.findAll();
+
+    if (machines.length === 0) {
+        await Machine.bulkCreate([
+            {
+                name: 'fsdfdsfds',
+            },
+            {
+                name: 'gaadsadsad',
+            },
+            {
+                name: 'fsdfdsgdafgdafds',
+            },
+            {
+                name: 'gdfsg',
+            },
+            {
+                name: 'ssgdf',
+            },
+        ]);
+    }
+
+    // ? Create default permissions
+    const permissions = await Permission.findAll();
+
+    if (permissions.length === 0) {
+        await Permission.bulkCreate([
+            {
+                user_id: 1,
+                machine_id: 1,
+            },
+            {
+                user_id: 1,
+                machine_id: 2,
+            },
+            {
+                user_id: 1,
+                machine_id: 3,
+            },
+            {
+                user_id: 2,
+                machine_id: 4,
+            },
+            {
+                user_id: 2,
+                machine_id: 5,
+            },
+        ]);
     }
 }
 async function syncDB() {
@@ -35,10 +94,8 @@ async function getUserByName(username) {
     const user = await User.findOne({
         where: {
             username: username,
-        }
+        },
     });
-
-    console.log(user);
 
     return user;
 }
@@ -47,10 +104,8 @@ async function getUserByID(ID) {
     const user = await User.findOne({
         where: {
             id: ID,
-        }
+        },
     });
-
-    console.log(user);
 
     return user;
 }
@@ -123,141 +178,67 @@ async function deleteMachine(ID) {
 }
 
 async function getUsers() {
-    const query = {
-        text: `
-			SELECT users.user_id, users.username, roles.role_id, roles.role, users.u_password 
-			FROM users 
-			INNER JOIN roles 
-				ON users.u_role=roles.role_id 
-			ORDER BY users.user_id ASC`,
-    };
+    const users = await User.findAll();
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res.rows;
-        })
-        .catch((e) => {
-            console.error(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return users;
 }
 
 async function getPermisions(userID) {
-    const query = {
-        text: `
-			SELECT machines.machine_id, machines.machine_name 
-			FROM machines
-			INNER JOIN permissions
-				ON machines.machine_id = permissions.machine_id
-			INNER JOIN users
-				ON users.user_id = permissions.user_id
-			WHERE users.user_id=${userID}`,
-    };
+    const permissions = await Machine.findAll({
+        include: {
+            model: User,
+            where: {
+                id: userID,
+            },
+        },
+    });
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res.rows;
-        })
-        .catch((e) => {
-            console.error(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return permissions;
 }
 
 async function addUser(username, role, password) {
-    const query = {
-        text: `
-			INSERT INTO users
-				(username, u_role, u_password)
-			VALUES 
-				('${username}', '${role}', '${password}')`,
-    };
+    const user = await User.create({
+        username: username,
+        role: role,
+        password: password,
+    });
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res;
-        })
-        .catch((e) => {
-            console.log(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return user;
 }
 
-async function updateUser(userID, username, role) {
-    const query = {
-        text: `
-			UPDATE users
-			SET username='${username}',
-					u_role='${role}'
-			WHERE user_id='${userID}'`,
-    };
+async function updateUser(ID, username, role) {
+    const user = await User.update(
+        {
+            username: username,
+            role: role,
+        },
+        {
+            where: {
+                id: ID,
+            },
+        }
+    );
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res;
-        })
-        .catch((e) => {
-            console.log(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return user;
 }
 
-async function deleteUser(userID) {
-    const query = {
-        text: `
-			DELETE FROM users
-			WHERE user_id='${userID}'`,
-    };
+async function deleteUser(ID) {
+    const user = await User.destroy({
+        where: {
+            id: ID,
+        },
+    });
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res;
-        })
-        .catch((e) => {
-            console.log(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return user;
 }
 
 async function addPermission(userID, machineID) {
-    const query = {
-        text: `
-			INSERT INTO permissions 
-				(user_id, machine_id)
-			VALUES 
-				('${userID}', '${machineID}')
-			ON CONFLICT (user_id, machine_id) DO UPDATE 
-				SET 
-					user_id=${userID}, 
-					machine_id=${machineID}`,
-    };
+    const permission = await Permission.upsert({
+        user_id: userID,
+        machine_id: machineID,
+    });
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res;
-        })
-        .catch((e) => {
-            console.log(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return permission;
 }
 
 async function revokePermission(userID, machineID) {
@@ -281,86 +262,41 @@ async function revokePermission(userID, machineID) {
 }
 
 async function getClasses() {
-    const query = {
-        text: `
-			SELECT * 
-			FROM classes`,
-    };
+    const classes = await Class.findAll();
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res.rows;
-        })
-        .catch((e) => {
-            console.error(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return classes;
 }
 
 async function getClassesForUser(userID) {
-    const query = {
-        text: `
-			SELECT * 
-			FROM classes
-			where user_id=${userID}`,
-    };
+    const classes = await Class.findAll({
+        where: {
+            user_id: userID,
+        },
+    });
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res.rows;
-        })
-        .catch((e) => {
-            console.error(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return classes;
 }
 
-async function addClass(userID, title, startTime, endTime, machineID) {
-    const query = {
-        text: `
-			INSERT INTO classes 
-				(user_id, title, start_time, end_time, machine_id)
-			VALUES 
-				('${userID}', '${title}', '${startTime}', '${endTime}', '${machineID}')`,
-    };
+async function addClass(userID, machineID, title, startTime, endTime) {
+    const newClass = await Class.create({
+        user_id: userID,
+        machine_id: machineID,
+        title: title,
+        start_time: startTime,
+        end_time: endTime,
+    });
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res;
-        })
-        .catch((e) => {
-            console.log(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return newClass;
 }
 
-async function deleteClass(classID) {
-    const query = {
-        text: `
-		DELETE FROM classes
-		WHERE class_id='${classID}'`,
-    };
+async function deleteClass(ID) {
+    const deletedClass = await Class.destroy({
+        where: {
+            id: ID,
+        },
+    });
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res;
-        })
-        .catch((e) => {
-            console.log(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return deletedClass;
 }
 
 async function addDefaultSettings(userID, defaultSettings) {

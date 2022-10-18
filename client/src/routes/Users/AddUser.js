@@ -51,7 +51,9 @@ export default function AddUser(props) {
                 variant: 'error',
             });
         else {
-            addUser(username, role, hashPass(password1)).then(() => {
+            const hash = await hashPass(password1);
+
+            addUser(username, role, hash).then(() => {
                 enqueueSnackbar('User has been added!', {
                     variant: 'success',
                 });
@@ -120,15 +122,11 @@ export default function AddUser(props) {
                                 value={role}
                                 onChange={(e) => {
                                     setRole(e.target.value);
-                                    console.log(e.target.value);
                                 }}
                             >
                                 {roles.map((role) => (
-                                    <MenuItem
-                                        key={role.role_id}
-                                        value={role.role_id}
-                                    >
-                                        {role.role}
+                                    <MenuItem key={role.id} value={role.name}>
+                                        {role.name}
                                     </MenuItem>
                                 ))}
                             </Select>

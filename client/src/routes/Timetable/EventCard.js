@@ -1,20 +1,19 @@
 import * as React from 'react';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import Grid from '@mui/material/Grid';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
+import {
+    Button,
+    Dialog,
+    Grid,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Typography,
+} from '@mui/material';
 import DatePicker from 'react-datepicker';
-import Typography from '@mui/material/Typography';
 import {
     getMachine,
     getUserByID,
     deleteClass,
     uploadToGoogleCalendar,
-    createCalendar,
-    getCalendars,
-    getGoogleAuthURL,
 } from 'API';
 import 'styles/event-card.css';
 import { useSnackbar } from 'notistack';
@@ -24,7 +23,7 @@ export default function Timetable(props) {
     const [user, setUser] = React.useState('');
     const [machine, setMachine] = React.useState('');
 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
 
     React.useEffect(() => {
@@ -39,7 +38,7 @@ export default function Timetable(props) {
 
     const handleDelete = () => {
         deleteClass(props.event.ID)
-            .then((response) => {
+            .then(() => {
                 enqueueSnackbar('Event has been successfully deleted!', {
                     variant: 'success',
                 });
@@ -55,36 +54,23 @@ export default function Timetable(props) {
     };
 
     const handleUploadToGoogleCalendar = async () => {
-        // createCalendar().catch((err) => {
-        //     enqueueSnackbar('Error occurred', {
-        //         variant: 'error',
-        //     });
-        //     console.error(err);
-        // });
-
-        // getCalendars().then((response) => {
-        //     console.log(response);
-        // });
-        navigate('/googleauth');
-
-        // uploadToGoogleCalendar(
-        //     props.event.userID,
-        //     props.event.title,
-        //     props.event.start,
-        //     props.event.end
-        // )
-        //     .then((response) => {
-        //         enqueueSnackbar('Event has been added to your calendar!', {
-        //             variant: 'success',
-        //         });
-        //         console.log(response);
-        //     })
-        //     .catch((err) => {
-        //         enqueueSnackbar('Error occurred', {
-        //             variant: 'error',
-        //         });
-        //         console.error(err);
-        //     });
+        uploadToGoogleCalendar(
+            props.event.title,
+            props.event.start,
+            props.event.end
+        )
+            .then((response) => {
+                enqueueSnackbar('Event has been added to your calendar!', {
+                    variant: 'success',
+                });
+                console.log(response);
+            })
+            .catch((err) => {
+                enqueueSnackbar('Error occurred', {
+                    variant: 'error',
+                });
+                console.error(err);
+            });
     };
 
     return (
@@ -117,9 +103,7 @@ export default function Timetable(props) {
                         <Typography variant='h5'>Machine: </Typography>
                     </Grid>
                     <Grid item xs={8} sx={{ justifyContent: 'center' }}>
-                        <Typography variant='h5'>
-                            {machine.machine_name}
-                        </Typography>
+                        <Typography variant='h5'>{machine.name}</Typography>
                     </Grid>
 
                     <Grid item xs={4}>

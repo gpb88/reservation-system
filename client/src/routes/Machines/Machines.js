@@ -8,8 +8,9 @@ import AddMachine from 'routes/Machines/AddMachine';
 import MachineCard from 'routes/Machines/MachineCard';
 
 const columns = [
-    { field: 'machine_name', headerName: 'Name', flex: 1, minWidth: 150 },
-    { field: 'description', headerName: 'Description', flex: 1, minWidth: 150 },
+    { field: 'name', headerName: 'Name', flex: 1, minWidth: 250 },
+    { field: 'description', headerName: 'Description', flex: 1, minWidth: 250 },
+    { field: 'location', headerName: 'Location', flex: 1, minWidth: 250 },
 ];
 
 export default function Machines() {
@@ -36,8 +37,8 @@ export default function Machines() {
 
     return (
         <Container
-            id='machine-page'
-            maxWidth='sm'
+            className='machines'
+            maxWidth='md'
             disableGutters
             sx={{ display: 'grid', justifyItems: 'center' }}
         >
@@ -54,7 +55,7 @@ export default function Machines() {
                 <FaPlus size='2em' />
             </Button>
             <DataGrid
-                getRowId={(row) => row.machine_id}
+                getRowId={(row) => row.id}
                 rows={machines}
                 columns={columns}
                 pageSize={5}

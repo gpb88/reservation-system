@@ -30,7 +30,6 @@ export default function UserPage(props) {
     };
 
     const handleRowClick = (user) => {
-        console.log(user);
         getRoles()
             .then((response) => {
                 setRoles(response);
@@ -65,7 +64,7 @@ export default function UserPage(props) {
                 <FaPlus size='2em' />
             </Button>
             <DataGrid
-                getRowId={(row) => row.user_id}
+                getRowId={(row) => row.id}
                 rows={users}
                 columns={columns}
                 pageSize={5}
