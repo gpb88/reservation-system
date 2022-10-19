@@ -4,6 +4,7 @@ import { updateHeader } from 'interceptors/token';
 const version = 'v1';
 const baseUrl = 'http://127.0.0.1:8080/' + version;
 updateHeader(axios);
+// ? Accept cookies
 
 export async function getUserByName(username) {
     const result = await axios
@@ -31,14 +32,14 @@ export async function getUserByID(userID) {
     return result;
 }
 
-export async function validateToken(token, userID) {
+export async function validateAccessToken(token, userID) {
     const result = await axios
-        .post(baseUrl + '/token', {
+        .post(baseUrl + '/token/validate/access', {
             token: token,
             userID: userID,
         })
         .then(function (response) {
-            return response;
+            return response.data.isValid;
         })
         .catch(function (error) {
             console.error(error);
@@ -47,13 +48,49 @@ export async function validateToken(token, userID) {
     return result;
 }
 
-export async function getToken(user) {
+export async function validateRefreshToken() {
     const result = await axios
-        .get(baseUrl + '/token', {
-            params: { userID: user.id },
-        })
+        .post(
+            baseUrl + '/token/validate/refresh',
+            {},
+            {
+                withCredentials: true,
+            }
+        )
         .then(function (response) {
-            return response.data.token;
+            return response.data.isValid;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function createToken(userID) {
+    const result = await axios
+        .post(
+            baseUrl + '/token/create',
+            { userID: userID },
+            {
+                withCredentials: true,
+            }
+        )
+        .then(function (response) {
+            return response.data.accessToken;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function refreshToken(userID) {
+    const result = await axios
+        .post(baseUrl + '/token/refresh', { userID: userID })
+        .then(function (response) {
+            return response.data.accessToken;
         })
         .catch(function (error) {
             console.error(error);
@@ -288,6 +325,19 @@ export async function getGoogleAuthURL() {
         .get(baseUrl + '/google/authorize/url')
         .then(function (response) {
             return response.data.url;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function getGoogleAuth() {
+    const result = await axios
+        .get(baseUrl + '/google/authorize/check')
+        .then(function (response) {
+            return response.data.isAuthorized;
         })
         .catch(function (error) {
             console.error(error);

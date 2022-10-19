@@ -21,28 +21,39 @@ import Permissions from 'routes/Permissions/Permissions';
 import MyAccount from 'routes/MyAccount/MyAccount';
 import UserSettings from 'routes/UserSettings/UserSettings';
 import { useNavigate } from 'react-router-dom';
-import { clearStorage, checkToken } from 'services/token';
-import { getUserID } from 'services/handleLogin';
+import { clearStorage, checkToken, getUserID } from 'services/token';
 import { useSnackbar } from 'notistack';
-import { getUserByID } from 'API';
+import { getUserByID, sendGoogleAuthCode } from 'API';
 
-const tokenCheckInterval = 30;
-
-export default function Home() {
+export default function Home(props) {
     const [user, setUser] = React.useState('');
     const [pages, setPages] = React.useState([]);
     const [pageComponent, setPageComponent] = React.useState(<Timetable />);
     const [anchorEl, setAnchorEl] = React.useState(null);
     const isMenuOpen = Boolean(anchorEl);
 
+    const checkInterval = 15;
     const navigate = useNavigate();
 
     const { enqueueSnackbar } = useSnackbar();
 
-    React.useEffect(() => [checkIfTokenExpired()], []);
+    const logout = () => {
+        clearStorage();
+        navigate('/');
+    };
 
     React.useEffect(async () => {
-        let userID = getUserID();
+        const checkTokenInterval = setInterval(async () => {
+            const logOut = await checkToken(props.rememberMe, logout);
+
+            console.log(logOut);
+            if (logOut) {
+                clearInterval(checkTokenInterval);
+                logout();
+            }
+        }, checkInterval * 1000);
+
+        const userID = getUserID();
 
         getUserByID(userID)
             .then((user) => {
@@ -63,21 +74,19 @@ export default function Home() {
             });
     }, []);
 
-    const checkIfTokenExpired = async () => {
-        let isAuthorized = await checkToken();
+    React.useEffect(async () => {
+        handleRedirect();
+    }, []);
 
-        if (!isAuthorized) {
-            enqueueSnackbar('Your token expired, you have been logged out', {
-                variant: 'warning',
-            });
-            clearTimeout(checkIfTokenExpired);
-            logout();
-        } else setTimeout(checkIfTokenExpired, tokenCheckInterval * 1000);
-    };
+    const handleRedirect = async () => {
+        const url = window.location.href;
+        if (url.includes('code')) {
+            const accessCode = new URL(url).searchParams.get('code');
 
-    const logout = () => {
-        clearStorage();
-        navigate('/');
+            window.history.pushState({}, document.title, '/home');
+
+            await sendGoogleAuthCode(accessCode).then(() => {});
+        }
     };
 
     const switchPage = (page) => {

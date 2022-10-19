@@ -15,9 +15,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { OAuth2Client } from 'google-auth-library';
 import { useSnackbar } from 'notistack';
 
-export default function Login() {
-    let [rememberMe, setRememberMe] = React.useState(false);
-
+export default function Login(props) {
     let navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
 
@@ -30,13 +28,14 @@ export default function Login() {
             password: data.get('password'),
         };
 
-        let authenticated = await handleLogin(loginUser, rememberMe).catch(
-            (err) => {
-                enqueueSnackbar('Error occured!', {
-                    variant: 'error',
-                });
-            }
-        );
+        const authenticated = await handleLogin(
+            loginUser,
+            props.rememberMe
+        ).catch((err) => {
+            enqueueSnackbar('Error occured!', {
+                variant: 'error',
+            });
+        });
 
         if (authenticated) navigate('/home');
         else
@@ -72,7 +71,7 @@ export default function Login() {
     };
 
     const handleChangeRememberMe = (event) => {
-        setRememberMe(event.target.checked);
+        props.setRememberMe(event.target.checked);
     };
 
     return (
@@ -125,7 +124,7 @@ export default function Login() {
                     <FormControlLabel
                         control={
                             <Checkbox
-                                value={rememberMe}
+                                value={props.rememberMe}
                                 color='primary'
                                 onChange={handleChangeRememberMe}
                             />

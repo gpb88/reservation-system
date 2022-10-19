@@ -1,5 +1,6 @@
-import { getUserByName, getToken } from 'API';
+import { getUserByName } from 'API';
 import { verifyPass } from 'services/password';
+import { issueNewToken } from 'services/token';
 
 export async function handleLogin(userToCheck, rememberMe) {
     let authenticated = false;
@@ -16,28 +17,7 @@ export async function handleLogin(userToCheck, rememberMe) {
         });
     }
 
-    if (authenticated) {
-        await getToken(userData)
-            .then((token) => {
-                if (rememberMe) {
-                    localStorage.setItem('token', token);
-                    localStorage.setItem('userID', userData.id);
-                } else {
-                    sessionStorage.setItem('token', token);
-                    sessionStorage.setItem('userID', userData.id);
-                }
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-    }
+    if (authenticated) await issueNewToken(userData.id, rememberMe);
 
     return authenticated;
-}
-
-export function getUserID() {
-    let userID = localStorage.getItem('userID');
-    if (userID == null) userID = sessionStorage.getItem('userID');
-
-    return userID;
 }

@@ -1,6 +1,13 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const { sequelize } = require('database/controller');
-const { User, Role, Machine, Class, Permission } = require('database/models');
+const {
+    User,
+    Role,
+    Machine,
+    Class,
+    Permission,
+    RefreshTokenHash,
+} = require('database/models');
 
 async function createDefaults() {
     // ? Create default roles
@@ -222,6 +229,30 @@ async function updateUser(ID, username, role) {
     return user;
 }
 
+async function updateRefreshToken(userID, refreshTokenHash) {
+    const user = await RefreshTokenHash.upsert({
+        id: userID,
+        refresh_token_hash: refreshTokenHash,
+    });
+
+    return user;
+}
+
+async function getRefreshToken(userID) {
+    const user = await RefreshTokenHash.findOne(
+        {
+            attributes: ['refresh_token_hash'],
+        },
+        {
+            where: {
+                id: userID,
+            },
+        }
+    );
+
+    return user;
+}
+
 async function deleteUser(ID) {
     const user = await User.destroy({
         where: {
@@ -419,4 +450,6 @@ module.exports = {
     getSettingsForUser,
     getSetting,
     saveSettings,
+    updateRefreshToken,
+    getRefreshToken,
 };

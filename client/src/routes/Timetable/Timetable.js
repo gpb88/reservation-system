@@ -3,20 +3,18 @@ import 'styles/timetable.css';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { getClasses, sendGoogleAuthCode, getGoogleAuthURL } from 'API';
+import { getClasses, getGoogleAuthURL } from 'API';
 import { Button, Typography, Box } from '@mui/material';
 import EventCard from 'routes/Timetable/EventCard';
 
 const localizer = momentLocalizer(moment);
 
-export default function Timetable() {
+export default function Timetable(props) {
     const [classes, setClasses] = useState([]);
     const [open, setOpen] = useState(false);
     const [event, setEvent] = useState('');
 
     useEffect(() => {
-        handleRedirect();
-
         refreshClasses();
     }, []);
 
@@ -50,17 +48,6 @@ export default function Timetable() {
 
     const handleClose = () => {
         setOpen(false);
-    };
-
-    const handleRedirect = async () => {
-        const url = window.location.href;
-        if (url.includes('code')) {
-            const accessCode = new URL(url).searchParams.get('code');
-
-            window.history.pushState({}, document.title, '/home');
-
-            await sendGoogleAuthCode(accessCode).then(() => {});
-        }
     };
 
     const handleGoogleAuth = async () => {
@@ -101,7 +88,7 @@ export default function Timetable() {
                 events={classes}
                 startAccessor='start'
                 endAccessor='end'
-                style={{ height: '80vh' }}
+                style={{ height: '70vh' }}
                 onSelectEvent={handleSelectEvent}
             />
         </div>

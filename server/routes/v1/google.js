@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { getSetting } = require('database/methods');
 const { google } = require('googleapis');
 
 const calendarName = 'AGH Calendar';
@@ -10,7 +9,24 @@ const oauth2Client = new google.auth.OAuth2(
     process.env.REDIRECT_URL
 );
 const scopes = ['https://www.googleapis.com/auth/calendar'];
-let googleCalendar = null;
+let googleCalendar = google.calendar({
+    version: 'v3',
+    auth: oauth2Client,
+});
+
+router.get('/authorize/check', function (req, res) {
+    oauth2Client
+        .getAccessToken()
+        .then((response) => {
+            console.log(response);
+
+            res.status(200).send({ isAuthorized: true });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(200).send({ isAuthorized: false });
+        });
+});
 
 router.get('/authorize/url', function (req, res) {
     const url = oauth2Client.generateAuthUrl({
@@ -29,11 +45,6 @@ router.post('/authorize/code', async function (req, res) {
 
     const { tokens } = await oauth2Client.getToken(accessCode);
     oauth2Client.setCredentials(tokens);
-
-    googleCalendar = google.calendar({
-        version: 'v3',
-        auth: oauth2Client,
-    });
 
     res.status(200).send();
 });

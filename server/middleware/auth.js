@@ -1,13 +1,13 @@
-const { validateToken } = require('services/token');
+const { validateAccessToken } = require('services/token');
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
     try {
-        const url = req.baseUrl;
+        const url = req.originalUrl;
         const method = req.method;
 
         const isRequestingLogin =
-            method === 'GET' &&
-            (url.includes('/user') || url.includes('/token'));
+            (method === 'GET' && url.includes('/user')) ||
+            url.includes('/token');
 
         if (isRequestingLogin) {
             next();
@@ -15,12 +15,14 @@ module.exports = (req, res, next) => {
             const token = req.headers.authorization.split(' ')[1];
             const userID = req.headers.userid;
 
-            let isValid = validateToken(token, userID);
+            let isValid = await validateAccessToken(token, userID);
+
             if (isValid) {
                 next();
             } else res.status(400).send();
         }
-    } catch {
+    } catch (err) {
+        console.log(err);
         res.status(500).send();
     }
 };

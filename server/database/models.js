@@ -45,12 +45,35 @@ const User = sequelize.define(
             },
         },
         password: {
-            type: DataTypes.STRING(70),
+            type: DataTypes.STRING(72),
             allowNull: false,
         },
     },
     {
         tableName: 'users',
+        timestamps: false,
+    }
+);
+
+const RefreshTokenHash = sequelize.define(
+    'RefreshTokenHash',
+    {
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: false,
+            primaryKey: true,
+            references: {
+                model: User,
+                key: 'id',
+            },
+        },
+        refresh_token_hash: {
+            type: DataTypes.STRING(72),
+            allowNull: false,
+        },
+    },
+    {
+        tableName: 'refresh_token_hashes',
         timestamps: false,
     }
 );
@@ -146,10 +169,20 @@ User.belongsTo(Role, {
     targetKey: 'name',
 });
 
+User.hasOne(RefreshTokenHash, {
+    foreignKey: 'id',
+    targetKey: 'id',
+});
+RefreshTokenHash.belongsTo(User, {
+    foreignKey: 'id',
+    targetKey: 'id',
+});
+
 module.exports = {
     User,
     Role,
     Machine,
     Class,
     Permission,
+    RefreshTokenHash,
 };
