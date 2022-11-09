@@ -64,7 +64,7 @@ export default function UserPage(props) {
                 <FaPlus size='2em' />
             </Button>
             <DataGrid
-                getRowId={(row) => row.id}
+                getRowID={(row) => row.id}
                 rows={users}
                 columns={columns}
                 pageSize={5}

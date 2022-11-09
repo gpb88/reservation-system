@@ -131,7 +131,7 @@ export default function PermissionPage() {
                 <FormControl sx={{ width: '50%' }}>
                     <InputLabel id='select-user-label'>Select user</InputLabel>
                     <Select
-                        labelId='select-user-label'
+                        labelID='select-user-label'
                         label='Select user'
                         onChange={handleUserChange}
                         value={userID}

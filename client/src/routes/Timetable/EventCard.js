@@ -12,7 +12,7 @@ import DatePicker from 'react-datepicker';
 import {
     getMachine,
     getUserByID,
-    deleteClass,
+    deleteEvent,
     uploadToGoogleCalendar,
 } from 'API';
 import 'styles/event-card.css';
@@ -37,12 +37,12 @@ export default function Timetable(props) {
     }, []);
 
     const handleDelete = () => {
-        deleteClass(props.event.ID)
+        deleteEvent(props.event.ID)
             .then(() => {
                 enqueueSnackbar('Event has been successfully deleted!', {
                     variant: 'success',
                 });
-                props.refreshClasses();
+                props.refreshEvents();
                 props.handleClose();
             })
             .catch((err) => {

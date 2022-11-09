@@ -15,7 +15,7 @@ import {
 import { Settings, Logout } from '@mui/icons-material';
 import Users from 'routes/Users/Users';
 import Timetable from 'routes/Timetable/Timetable';
-import AddClass from 'routes/AddClass/AddClass';
+import AddEvent from 'routes/AddEvent/AddEvent';
 import Machines from 'routes/Machines/Machines';
 import Permissions from 'routes/Permissions/Permissions';
 import MyAccount from 'routes/MyAccount/MyAccount';
@@ -28,7 +28,7 @@ import { getUserByID, sendGoogleAuthCode } from 'API';
 export default function Home(props) {
     const [user, setUser] = React.useState('');
     const [pages, setPages] = React.useState([]);
-    const [pageComponent, setPageComponent] = React.useState(<Timetable />);
+    const [pageComponent, setPageComponent] = React.useState(null);
     const [anchorEl, setAnchorEl] = React.useState(null);
     const isMenuOpen = Boolean(anchorEl);
 
@@ -60,18 +60,20 @@ export default function Home(props) {
         const userID = getUserID();
 
         getUserByID(userID)
-            .then((user) => {
-                setUser(user);
+            .then((response) => {
+                setUser(response);
 
-                user.role == 'admin'
+                response.role == 'admin'
                     ? setPages([
                           'Timetable',
-                          'Add class',
+                          'Add event',
                           'Users',
                           'Machines',
                           'Permissions',
                       ])
-                    : setPages(['Timetable', 'Add class']);
+                    : setPages(['Timetable', 'Add event']);
+
+                setPageComponent(<Timetable userID={response.id} />);
             })
             .catch((err) => {
                 console.error(err);
@@ -94,6 +96,7 @@ export default function Home(props) {
     };
 
     const switchPage = (page) => {
+        console.log(user);
         switch (page) {
             case 'Users':
                 setPageComponent(<Users user={user} logout={logout} />);
@@ -102,10 +105,10 @@ export default function Home(props) {
                 setPageComponent(<Permissions />);
                 break;
             case 'Timetable':
-                setPageComponent(<Timetable />);
+                setPageComponent(<Timetable userID={user.id} />);
                 break;
-            case 'Add class':
-                setPageComponent(<AddClass user={user} />);
+            case 'Add event':
+                setPageComponent(<AddEvent user={user} />);
                 break;
             case 'Machines':
                 setPageComponent(<Machines />);
@@ -117,7 +120,7 @@ export default function Home(props) {
                 setPageComponent(<UserSettings user={user} />);
                 break;
             default:
-                setPageComponent(<Timetable />);
+                setPageComponent(<Timetable userID={user.id} />);
                 break;
         }
     };
@@ -185,7 +188,8 @@ export default function Home(props) {
                             <Avatar
                                 sx={{
                                     '&:hover': {
-                                        boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 15px',
+                                        boxShadow:
+                                            'rgba(0, 0, 0, 0.35) 0px 5px 15px',
                                     },
                                 }}
                             />

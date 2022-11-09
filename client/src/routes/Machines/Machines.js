@@ -55,7 +55,7 @@ export default function Machines() {
                 <FaPlus size='2em' />
             </Button>
             <DataGrid
-                getRowId={(row) => row.id}
+                getRowID={(row) => row.id}
                 rows={machines}
                 columns={columns}
                 pageSize={5}

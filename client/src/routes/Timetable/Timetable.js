@@ -3,38 +3,38 @@ import 'styles/timetable.css';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { getClasses, getGoogleAuthURL } from 'API';
+import { getEvents, getGoogleAuthURL } from 'API';
 import { Button, Typography, Box } from '@mui/material';
 import EventCard from 'routes/Timetable/EventCard';
 
 const localizer = momentLocalizer(moment);
 
 export default function Timetable(props) {
-    const [classes, setClasses] = useState([]);
+    const [events, setEvents] = useState([]);
     const [open, setOpen] = useState(false);
     const [event, setEvent] = useState('');
 
     useEffect(() => {
-        refreshClasses();
+        refreshEvents();
     }, []);
 
-    const refreshClasses = () => {
-        getClasses()
+    const refreshEvents = () => {
+        getEvents()
             .then((response) => {
-                let newClasses = [];
-                response.forEach((_class) => {
-                    let newClass = {};
-                    newClass.ID = _class.id;
-                    newClass.userID = _class.user_id;
-                    newClass.machineID = _class.machine_id;
-                    newClass.title = _class.title;
-                    newClass.start = new Date(_class.start_time);
-                    newClass.end = new Date(_class.end_time);
+                let newEvents = [];
+                response.forEach((event) => {
+                    let newEvent = {};
+                    newEvent.ID = event.id;
+                    newEvent.userID = event.user_id;
+                    newEvent.machineID = event.machine_id;
+                    newEvent.title = event.title;
+                    newEvent.start = new Date(event.start_time);
+                    newEvent.end = new Date(event.end_time);
 
-                    newClasses.push(newClass);
+                    newEvents.push(newEvent);
                 });
 
-                setClasses(newClasses);
+                setEvents(newEvents);
             })
             .catch((err) => {
                 console.error(err);
@@ -65,7 +65,7 @@ export default function Timetable(props) {
                     open={open}
                     event={event}
                     handleClose={handleClose}
-                    refreshClasses={refreshClasses}
+                    refreshEvents={refreshEvents}
                 />
             ) : null}
             <Button
@@ -116,11 +116,21 @@ export default function Timetable(props) {
             <Calendar
                 localizer={localizer}
                 culture='en-gb'
-                events={classes}
+                events={events}
                 startAccessor='start'
                 endAccessor='end'
                 style={{ height: '70vh' }}
                 onSelectEvent={handleSelectEvent}
+                eventPropGetter={(event) => {
+                    return {
+                        style: {
+                            backgroundColor:
+                                event.userID == props.userID
+                                    ? '#9E9E9E'
+                                    : '#' + event.hexColor,
+                        },
+                    };
+                }}
             />
         </div>
     );

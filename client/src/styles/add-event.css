@@ -1,4 +1,4 @@
-.add-class {
+.add-event {
 	width: 40% !important;
 	margin: 0 auto;
 	display: flex;
@@ -12,7 +12,7 @@
 	padding: 5px;
 }
 
-.add-class .add-class-datepicker {
+.add-event .add-event-datepicker {
 	font-size: 25px;
 	font-family: Verdana;
 	border-radius: 5px;
@@ -23,6 +23,6 @@
 	padding: 5px 0;
 }
 
-.add-class .add-class-datepicker:hover {
+.add-event .add-event-datepicker:hover {
 	border-color: rgba(0, 0, 0, 0.87);
 }

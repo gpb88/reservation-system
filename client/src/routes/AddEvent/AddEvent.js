@@ -10,15 +10,15 @@ import {
 } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import 'styles/add-class.css';
-import { getClasses, addClass, getPermissions } from 'API';
+import 'styles/add-event.css';
+import { getEvents, addEvent, getPermissions } from 'API';
 import { useSnackbar } from 'notistack';
 
-export default function AddClass(props) {
+export default function AddEvent(props) {
     const [title, setTitle] = React.useState('My Event');
     const [startTime, setStartTime] = React.useState(new Date());
     const [endTime, setEndTime] = React.useState(new Date());
-    const [classes, setClasses] = React.useState([]);
+    const [events, setEvents] = React.useState([]);
     const [machine, setMachine] = React.useState('');
     const [machines, setMachines] = React.useState([]);
     const [eventStartTimes, setEventStartTimes] = React.useState([]);
@@ -27,19 +27,19 @@ export default function AddClass(props) {
     const { enqueueSnackbar } = useSnackbar();
 
     React.useEffect(() => {
-        getClasses()
+        getEvents()
             .then((response) => {
-                let newClasses = [];
+                let newEvents = [];
 
-                response.forEach((_class) => {
-                    let newClass = {};
-                    newClass.start = new Date(_class.start_time);
-                    newClass.end = new Date(_class.end_time);
+                response.forEach((event) => {
+                    let newEvent = {};
+                    newEvent.start = new Date(event.start_time);
+                    newEvent.end = new Date(event.end_time);
 
-                    newClasses.push(newClass);
+                    newEvents.push(newEvent);
                 });
 
-                setClasses(newClasses);
+                setEvents(newEvents);
             })
             .catch((err) => {
                 console.log(err);
@@ -58,7 +58,7 @@ export default function AddClass(props) {
         setMachine(event.target.value);
     };
 
-    const handleAddClass = async () => {
+    const handleAddEvent = async () => {
         // ? Data validation
         if (new Date(startTime).getTime() >= new Date(endTime).getTime()) {
             return enqueueSnackbar("End time can't precede start time!", {
@@ -66,7 +66,7 @@ export default function AddClass(props) {
             });
         }
 
-        addClass(
+        addEvent(
             props.user.id,
             machine,
             title,
@@ -74,7 +74,7 @@ export default function AddClass(props) {
             new Date(endTime)
         )
             .then(() => {
-                return enqueueSnackbar('Class successfully added', {
+                return enqueueSnackbar('Event has been added', {
                     variant: 'success',
                 });
             })
@@ -91,9 +91,9 @@ export default function AddClass(props) {
         let isAvailable = true;
 
         // // ? Check if dates are already reseved
-        // classes.forEach((_class) => {
-        //     const classStartDate = new Date(_class.start);
-        //     const classEndDate = new Date(_class.end);
+        // events.forEach((event) => {
+        //     const classStartDate = new Date(event.start);
+        //     const classEndDate = new Date(event.end);
 
         //     if (
         //         classStartDate.getTime() <= dateFromPicker.getTime() &&
@@ -133,7 +133,7 @@ export default function AddClass(props) {
     };
 
     return (
-        <Container className='add-class'>
+        <Container className='add-event'>
             <Grid
                 container
                 sx={{
@@ -145,7 +145,7 @@ export default function AddClass(props) {
             >
                 <Grid item xs={12} sx={{ mt: 6, mb: 4 }}>
                     <Typography variant='h4' align='center'>
-                        Add class
+                        Add event
                     </Typography>
                 </Grid>
 
@@ -220,7 +220,7 @@ export default function AddClass(props) {
                         disableGutters
                     >
                         <DatePicker
-                            className='add-class-datepicker'
+                            className='add-event-datepicker'
                             showTimeSelect
                             popperPlacement='right'
                             timeFormat='HH:mm'
@@ -278,7 +278,7 @@ export default function AddClass(props) {
                         disableGutters
                     >
                         <DatePicker
-                            className='add-class-datepicker'
+                            className='add-event-datepicker'
                             showTimeSelect
                             timeFormat='HH:mm'
                             popperPlacement='right'
@@ -361,7 +361,7 @@ export default function AddClass(props) {
                             my: 6,
                             width: '100px',
                         }}
-                        onClick={handleAddClass}
+                        onClick={handleAddEvent}
                     >
                         Submit
                     </Button>

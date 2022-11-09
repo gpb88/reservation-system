@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { verifyCredentials, generateTokens } from 'services/handleLogin';
-import { verifyOtpSecret, getUserByExternalId, addExternalUser } from 'API';
+import { verifyOtpSecret, getUserByExternalID, addExternalUser } from 'API';
 import { GoogleLogin } from '@react-oauth/google';
 import { OAuth2Client } from 'google-auth-library';
 import { useSnackbar } from 'notistack';
@@ -26,7 +26,7 @@ export default function Login(props) {
     const { enqueueSnackbar } = useSnackbar();
     const [token, setToken] = React.useState('');
     const [showOtpWindow, setShowOtpWindow] = React.useState(false);
-    const [userId, setUserId] = React.useState(false);
+    const [userID, setUserID] = React.useState(false);
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -50,7 +50,7 @@ export default function Login(props) {
 
         if (authenticatedUser !== false) {
             if (authenticatedUser.otp_enabled) {
-                setUserId(authenticatedUser.id);
+                setUserID(authenticatedUser.id);
                 setShowOtpWindow(true);
             } else {
                 generateTokens(authenticatedUser.id, props.rememberMe).then(
@@ -66,7 +66,7 @@ export default function Login(props) {
         try {
             const client = new OAuth2Client(CLIENT_ID_GOOGLE);
 
-            const ticket = await client.verifyIdToken({
+            const ticket = await client.verifyIDToken({
                 idToken: token,
                 audience: CLIENT_ID_GOOGLE,
             });
@@ -85,13 +85,13 @@ export default function Login(props) {
         console.log(googleUserData);
 
         try {
-            const authenticatedUser = await getUserByExternalId(
+            const authenticatedUser = await getUserByExternalID(
                 googleUserData.payload.sub,
                 'GOOGLE'
             );
 
             if (authenticatedUser.otp_enabled) {
-                setUserId(authenticatedUser.id);
+                setUserID(authenticatedUser.id);
                 setShowOtpWindow(true);
             } else {
                 generateTokens(authenticatedUser.id, props.rememberMe).then(
@@ -116,9 +116,9 @@ export default function Login(props) {
     };
 
     const handleOtpVerification = async () => {
-        const verified = await verifyOtpSecret(userId, token);
+        const verified = await verifyOtpSecret(userID, token);
         if (verified) {
-            generateTokens(userId, props.rememberMe).then(() => {
+            generateTokens(userID, props.rememberMe).then(() => {
                 navigate('/home');
             });
         } else {

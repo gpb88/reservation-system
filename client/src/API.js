@@ -19,10 +19,10 @@ export async function getUserByName(username) {
     return result;
 }
 
-export async function getUserByExternalId(externalId, externalType) {
+export async function getUserByExternalID(externalID, externalType) {
     const result = await axios
         .get(baseUrl + '/user/external', {
-            params: { externalId: externalId, externalType: externalType },
+            params: { externalID: externalID, externalType: externalType },
         })
         .then(function (response) {
             return response.data.user;
@@ -231,11 +231,11 @@ export async function addUser(username, role, password) {
     return result;
 }
 
-export async function addExternalUser(username, externalId, externalType) {
+export async function addExternalUser(username, externalID, externalType) {
     const result = await axios
         .post(baseUrl + '/user/external', {
             username: username,
-            externalId: externalId,
+            externalID: externalID,
             externalType: externalType,
         })
         .then(function (response) {
@@ -296,11 +296,11 @@ export async function setPermissions(userID, machines) {
     return result;
 }
 
-export async function getClasses() {
+export async function getEvents() {
     const result = await axios
-        .get(baseUrl + '/class/all')
+        .get(baseUrl + '/event/all')
         .then(function (response) {
-            return response.data.classes;
+            return response.data.events;
         })
         .catch(function (error) {
             console.error(error);
@@ -309,9 +309,9 @@ export async function getClasses() {
     return result;
 }
 
-export async function addClass(userID, machineID, title, startTime, endTime) {
+export async function addEvent(userID, machineID, title, startTime, endTime) {
     const result = await axios
-        .post(baseUrl + '/class', {
+        .post(baseUrl + '/event', {
             userID: userID,
             machineID: machineID,
             title: title,
@@ -328,11 +328,11 @@ export async function addClass(userID, machineID, title, startTime, endTime) {
     return result;
 }
 
-export async function deleteClass(classID) {
+export async function deleteEvent(eventID) {
     const result = await axios
-        .delete(baseUrl + '/class', { data: { classID: classID } })
+        .delete(baseUrl + '/event', { data: { eventID: eventID } })
         .then(function (response) {
-            return response.data.class;
+            return response.data.event;
         })
         .catch(function (error) {
             console.error(error);
