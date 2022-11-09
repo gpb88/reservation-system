@@ -5,7 +5,7 @@ const user = require('routes/v1/user');
 const roles = require('routes/v1/roles');
 const machine = require('routes/v1/machine');
 const permissions = require('routes/v1/permissions');
-const _class = require('routes/v1/class');
+const event = require('routes/v1/event');
 const google = require('routes/v1/google');
 const settings = require('routes/v1/settings');
 const otp = require('routes/v1/otp');
@@ -18,7 +18,7 @@ module.exports = function (app) {
     app.use(`/${version}/token`, auth, token);
     app.use(`/${version}/machine`, auth, machine);
     app.use(`/${version}/permissions`, auth, permissions);
-    app.use(`/${version}/class`, auth, _class);
+    app.use(`/${version}/event`, auth, event);
     app.use(`/${version}/google`, auth, google);
     app.use(`/${version}/settings`, auth, settings);
     app.use(`/${version}/otp`, auth, otp);

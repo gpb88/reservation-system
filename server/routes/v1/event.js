@@ -1,15 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const {
-    getClasses,
-    addClass,
-    deleteClass,
-} = require('database/methods');
+const { getEvents, addEvent, deleteEvent } = require('database/methods');
 
 router.get('/all', function (req, res) {
-    getClasses()
-        .then((classes) => {
-            res.status(200).send({ classes: classes });
+    getEvents()
+        .then((response) => {
+            res.status(200).send({ events: response });
         })
         .catch((err) => {
             console.log(err);
@@ -20,7 +16,7 @@ router.get('/all', function (req, res) {
 router.post('/', function (req, res) {
     let { userID, machineID, title, startTime, endTime } = req.body;
 
-    addClass(userID, machineID, title, startTime, endTime)
+    addEvent(userID, machineID, title, startTime, endTime)
         .then(() => {
             res.status(200).send();
         })
@@ -31,14 +27,14 @@ router.post('/', function (req, res) {
 });
 
 router.delete('/', function (req, res) {
-    const { classID } = req.body;
+    const { eventID } = req.body;
 
-    if (!classID) {
+    if (!eventID) {
         console.log('Incomplete data');
         return res.status(400).send();
     }
 
-    deleteClass(classID)
+    deleteEvent(eventID)
         .then(() => {
             res.status(200).send();
         })

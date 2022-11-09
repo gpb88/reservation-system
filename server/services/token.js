@@ -63,7 +63,7 @@ async function validateRefreshToken(refreshToken) {
     return isValid;
 }
 
-async function getUserIdFromToken(accessToken) {
+async function getUserIDFromToken(accessToken) {
     let userID = null;
     const key = process.env.ACCESS_PUBLIC_KEY.replace(/\\n/g, '\n');
 
@@ -95,5 +95,5 @@ module.exports = {
     createRefreshToken,
     validateAccessToken,
     validateRefreshToken,
-    getUserIdFromToken,
+    getUserIDFromToken,
 };

@@ -5,7 +5,7 @@ const {
     validateRefreshToken,
     createAccessToken,
     createRefreshToken,
-    getUserIdFromToken,
+    getUserIDFromToken,
 } = require('services/token');
 
 router.post('/refresh', async function (req, res) {

@@ -9,7 +9,7 @@ const {
     updateUser,
     addDefaultSettings,
     addExternalUser,
-    getUserByExternalId,
+    getUserByExternalID,
 } = require('database/methods');
 
 router.get('/', async function (req, res) {
@@ -39,14 +39,14 @@ router.get('/', async function (req, res) {
 
 router.get('/external', async function (req, res) {
     try {
-        const { externalId, externalType } = req.query;
+        const { externalID, externalType } = req.query;
 
-        if (!externalId && !externalType) {
+        if (!externalID && !externalType) {
             console.log('No type or ID');
             return res.status(400).send();
         }
 
-        const user = await getUserByExternalId(externalId, externalType);
+        const user = await getUserByExternalID(externalID, externalType);
 
         if (user == false || user == null) {
             console.log('User not found');
@@ -123,19 +123,19 @@ router.post('/', async function (req, res) {
 
 router.post('/external', async function (req, res) {
     try {
-        const { username, externalId, externalType } = req.body;
+        const { username, externalID, externalType } = req.body;
 
-        if (!username || !externalId || !externalType) {
+        if (!username || !externalID || !externalType) {
             console.log('Incomplete data');
             return res.status(200).send();
         }
 
-        const user = await getUserByExternalId(externalId, externalType);
+        const user = await getUserByExternalID(externalID, externalType);
 
         if (user == false || user == null) {
             const newUser = await addExternalUser(
                 username,
-                externalId,
+                externalID,
                 externalType
             ).catch((err) => {
                 console.log(err);

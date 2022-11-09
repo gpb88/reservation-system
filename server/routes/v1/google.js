@@ -65,11 +65,11 @@ router.post('/event', async function (req, res) {
             dateTime: end,
             timeZone: timeZone,
         },
-        colorId: colorID,
+        colorID: colorID,
     };
 
     googleCalendar.events
-        .insert({ calendarId: 'primary', resource: event })
+        .insert({ calendarID: 'primary', resource: event })
         .then((response) => {
             console.log('Event added');
             res.status(200).send();

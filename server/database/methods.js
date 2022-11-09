@@ -137,10 +137,10 @@ async function getUserByID(ID) {
     return user;
 }
 
-async function getUserByExternalId(externalId, externalType) {
+async function getUserByExternalID(externalID, externalType) {
     const user = await User.findOne({
         where: {
-            external_id: externalId,
+            external_id: externalID,
             external_type: externalType,
         },
     });
@@ -246,10 +246,10 @@ async function addUser(username, role, password) {
     return user;
 }
 
-async function addExternalUser(username, externalId, externalType) {
+async function addExternalUser(username, externalID, externalType) {
     const user = await User.create({
         username: username,
-        external_id: externalId,
+        external_id: externalID,
         external_type: externalType,
     });
 
@@ -341,13 +341,13 @@ async function revokePermission(userID, machineID) {
     return permission;
 }
 
-async function getClasses() {
+async function getEvents() {
     const classes = await Class.findAll();
 
     return classes;
 }
 
-async function getClassesForUser(userID) {
+async function getEventsForUser(userID) {
     const classes = await Class.findAll({
         where: {
             user_id: userID,
@@ -357,8 +357,8 @@ async function getClassesForUser(userID) {
     return classes;
 }
 
-async function addClass(userID, machineID, title, startTime, endTime) {
-    const newClass = await Class.create({
+async function addEvent(userID, machineID, title, startTime, endTime) {
+    const newEvent = await Class.create({
         user_id: userID,
         machine_id: machineID,
         title: title,
@@ -366,10 +366,10 @@ async function addClass(userID, machineID, title, startTime, endTime) {
         end_time: endTime,
     });
 
-    return newClass;
+    return newEvent;
 }
 
-async function deleteClass(ID) {
+async function deleteEvent(ID) {
     const deletedClass = await Class.destroy({
         where: {
             id: ID,
@@ -451,7 +451,7 @@ module.exports = {
     updateMachine,
     getMachineByName,
     getMachineByID,
-    getClassesForUser,
+    getEventsForUser,
     addMachine,
     deleteMachine,
     getUsers,
@@ -460,9 +460,9 @@ module.exports = {
     addPermission,
     revokePermission,
     deleteUser,
-    getClasses,
-    addClass,
-    deleteClass,
+    getEvents,
+    addEvent,
+    deleteEvent,
     addDefaultSettings,
     getSettings,
     getSetting,
@@ -472,5 +472,5 @@ module.exports = {
     getRefreshToken,
     updateUserOtp,
     addExternalUser,
-    getUserByExternalId,
+    getUserByExternalID,
 };
