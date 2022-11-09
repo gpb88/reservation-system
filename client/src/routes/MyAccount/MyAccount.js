@@ -3,7 +3,6 @@ import { Container, Grid, Button, Typography, Checkbox } from '@mui/material';
 import 'styles/my-account.css';
 import ChangeEmail from 'routes/MyAccount/Pages/ChangeEmail';
 import ChangePassword from 'routes/MyAccount/Pages/ChangePassword';
-import TwoStepVerification from 'routes/MyAccount/Pages/TwoStepVerification';
 import DeleteAccount from 'routes/MyAccount/Pages/DeleteAccount';
 
 export default function MyAccount(props) {
@@ -18,9 +17,6 @@ export default function MyAccount(props) {
                 break;
             case 'Change password':
                 setPage(<ChangePassword />);
-                break;
-            case 'Two step verification':
-                setPage(<TwoStepVerification />);
                 break;
             case 'Delete account':
                 setPage(<DeleteAccount />);
@@ -84,17 +80,6 @@ export default function MyAccount(props) {
                                 }}
                             >
                                 Password
-                            </Button>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Button
-                                variant='contained'
-                                sx={{ width: '80%' }}
-                                onClick={() => {
-                                    changePage('Two step verification');
-                                }}
-                            >
-                                Two-step verification
                             </Button>
                         </Grid>
                         <Grid item xs={12}>

@@ -8,7 +8,9 @@ export function updateHeader(axios) {
 
             const isRequestingLogin =
                 (method === 'get' && url.includes('/user')) ||
-                url.includes('/token');
+                (method === 'post' && url.includes('/user/external')) ||
+                (method === 'post' && url.includes('/token/create')) ||
+                (method === 'post' && url.includes('/otp/verify-secret'));
 
             if (!isRequestingLogin) {
                 const jwtToken = getToken();

@@ -7,7 +7,9 @@ const {
     Class,
     Permission,
     RefreshTokenHash,
+    Settings,
 } = require('database/models');
+const { defaultSettings } = require('services/defaultSettings');
 
 async function createDefaults() {
     // ? Create default roles
@@ -30,12 +32,30 @@ async function createDefaults() {
                 password:
                     '$2a$12$q9g.oOA9NiirdGMCi4X6QOg2aWhDKn9hvZSMgr5kbRRSALyomUmme',
                 role: 'admin',
+                otp_enabled: false,
             },
             {
                 username: 'user',
                 password:
                     '$2a$12$TaC88Ae0NEVdLx/t9PFMX.Xhti6.9aTJFgamUBiTsZPV7gLRAy2iq',
                 role: 'user',
+                otp_enabled: false,
+            },
+        ]);
+    }
+
+    // ? Create default users
+    const settings = await Settings.findAll();
+
+    if (settings.length === 0) {
+        await Settings.bulkCreate([
+            {
+                id: 1,
+                create_calendar: false,
+            },
+            {
+                id: 2,
+                create_calendar: false,
             },
         ]);
     }
@@ -92,7 +112,7 @@ async function createDefaults() {
     }
 }
 async function syncDB() {
-    await sequelize.sync({ force: true });
+    await sequelize.sync();
 
     createDefaults();
 }
@@ -111,6 +131,17 @@ async function getUserByID(ID) {
     const user = await User.findOne({
         where: {
             id: ID,
+        },
+    });
+
+    return user;
+}
+
+async function getUserByExternalId(externalId, externalType) {
+    const user = await User.findOne({
+        where: {
+            external_id: externalId,
+            external_type: externalType,
         },
     });
 
@@ -149,20 +180,22 @@ async function getMachineByName(name) {
     return machine;
 }
 
-async function addMachine(name, description) {
+async function addMachine(name, description, location) {
     const machine = await Machine.create({
         name: name,
         description: description,
+        location: location,
     });
 
     return machine;
 }
 
-async function updateMachine(ID, name, description) {
+async function updateMachine(ID, name, description, location) {
     const machine = await Machine.update(
         {
             name: name,
             description: description,
+            location: location,
         },
         {
             where: {
@@ -213,6 +246,16 @@ async function addUser(username, role, password) {
     return user;
 }
 
+async function addExternalUser(username, externalId, externalType) {
+    const user = await User.create({
+        username: username,
+        external_id: externalId,
+        external_type: externalType,
+    });
+
+    return user;
+}
+
 async function updateUser(ID, username, role) {
     const user = await User.update(
         {
@@ -222,6 +265,21 @@ async function updateUser(ID, username, role) {
         {
             where: {
                 id: ID,
+            },
+        }
+    );
+
+    return user;
+}
+
+async function updateUserOtp(userID, otp_enabled) {
+    const user = await User.update(
+        {
+            otp_enabled: otp_enabled,
+        },
+        {
+            where: {
+                id: userID,
             },
         }
     );
@@ -273,23 +331,14 @@ async function addPermission(userID, machineID) {
 }
 
 async function revokePermission(userID, machineID) {
-    const query = {
-        text: `
-			DELETE FROM permissions
-			WHERE user_id=${userID} AND machine_id=${machineID}`,
-    };
+    const permission = await Permission.destroy({
+        where: {
+            user_id: userID,
+            machine_id: machineID,
+        },
+    });
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res;
-        })
-        .catch((e) => {
-            console.log(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return permission;
 }
 
 async function getClasses() {
@@ -330,98 +379,66 @@ async function deleteClass(ID) {
     return deletedClass;
 }
 
-async function addDefaultSettings(userID, defaultSettings) {
-    let result;
+async function addDefaultSettings(userID) {
+    const settings = await Settings.create({
+        id: userID,
+        otp: defaultSettings.otp,
+        create_calendar: defaultSettings.create_calendar,
+    });
 
-    for (const [key, value] of Object.entries(defaultSettings)) {
-        console.log(key, value, userID);
-        const query = {
-            text: `
-				INSERT INTO user_settings
-					(user_id, key, value)
-				VALUES
-					('${userID}', '${key}', '${value}')`,
-        };
-
-        result = await client
-            .query(query)
-            .then((res) => {
-                return res;
-            })
-            .catch((e) => {
-                console.log(e.stack);
-                throw e.stack;
-            });
-    }
-
-    return result;
+    return settings;
 }
 
-async function getSettingsForUser(userID) {
-    const query = {
-        text: `
-		SELECT key, value
-		FROM user_settings
-		WHERE user_id='${userID}'`,
-    };
+async function getSettings(userID) {
+    const settings = await Settings.findOne({
+        where: {
+            id: userID,
+        },
+    });
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res.rows;
-        })
-        .catch((e) => {
-            console.error(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return settings;
 }
 
 async function getSetting(userID, key) {
-    const query = {
-        text: `
-		SELECT value
-		FROM user_settings
-		WHERE key='${key}' AND user_id='${userID}'`,
-    };
+    const setting = await Settings.findOne({
+        attributes: [key],
+        where: {
+            id: userID,
+        },
+    });
 
-    let result = await client
-        .query(query)
-        .then((res) => {
-            return res.rows[0].value;
-        })
-        .catch((e) => {
-            console.error(e.stack);
-            throw e.stack;
-        });
-
-    return result;
+    return setting;
 }
 
-async function saveSettings(userID, settings) {
-    let result;
+async function updateSettings(userID, newSettings) {
+    const settings = await Settings.update(
+        {
+            otp: newSettings.otp,
+            create_calendar: newSettings.create_calendar,
+        },
+        {
+            where: {
+                id: userID,
+            },
+        }
+    );
 
-    for (const [key, value] of Object.entries(settings)) {
-        const query = {
-            text: `
-				UPDATE user_settings
-				SET value='${value}'
-				WHERE key='${key}' AND user_id='${userID}'`,
-        };
+    return settings;
+}
 
-        result = await client
-            .query(query)
-            .then((res) => {
-                return res.rows;
-            })
-            .catch((e) => {
-                console.error(e.stack);
-                throw e.stack;
-            });
-    }
+async function updateSetting(userID, key, value) {
+    const settings = await Settings.update(
+        {
+            [key]: value,
+        },
+        {
+            where: {
+                id: userID,
+            },
+        }
+    );
 
-    return result;
+    return settings;
 }
 
 module.exports = {
@@ -447,9 +464,13 @@ module.exports = {
     addClass,
     deleteClass,
     addDefaultSettings,
-    getSettingsForUser,
+    getSettings,
     getSetting,
-    saveSettings,
+    updateSettings,
+    updateSetting,
     updateRefreshToken,
     getRefreshToken,
+    updateUserOtp,
+    addExternalUser,
+    getUserByExternalId,
 };

@@ -32,7 +32,7 @@ export default function Home(props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const isMenuOpen = Boolean(anchorEl);
 
-    const checkInterval = 15;
+    const checkInterval = 60;
     const navigate = useNavigate();
 
     const { enqueueSnackbar } = useSnackbar();
@@ -43,16 +43,20 @@ export default function Home(props) {
     };
 
     React.useEffect(async () => {
-        const checkTokenInterval = setInterval(async () => {
-            const logOut = await checkToken(props.rememberMe, logout);
+        const logOut = await checkToken(props.rememberMe);
+        if (logOut) logout();
 
-            console.log(logOut);
+        const checkTokenInterval = setInterval(async () => {
+            const logOut = await checkToken(props.rememberMe);
+
             if (logOut) {
                 clearInterval(checkTokenInterval);
                 logout();
             }
         }, checkInterval * 1000);
+    }, []);
 
+    React.useEffect(async () => {
         const userID = getUserID();
 
         getUserByID(userID)
@@ -178,7 +182,13 @@ export default function Home(props) {
                                 },
                             }}
                         >
-                            <Avatar />
+                            <Avatar
+                                sx={{
+                                    '&:hover': {
+                                        boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 15px',
+                                    },
+                                }}
+                            />
                         </Box>
                         <Menu
                             anchorEl={anchorEl}
@@ -198,7 +208,7 @@ export default function Home(props) {
                                         ml: -0.5,
                                         mr: 1,
                                     },
-                                    // ? Arrow poinitng upwards
+                                    // ? Arrow pointing upwards
                                     '&:before': {
                                         content: '""',
                                         display: 'block',

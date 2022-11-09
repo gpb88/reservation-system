@@ -18,7 +18,7 @@ import { useSnackbar } from 'notistack';
 
 export default function UserCard(props) {
     const [username, setUsername] = React.useState(props.selectedUser.username);
-    const [roleID, setRoleID] = React.useState(props.selectedUser.role_id);
+    const [role, setRole] = React.useState(props.selectedUser.role);
     const [roles, setRoles] = React.useState(props.roles);
 
     const { enqueueSnackbar } = useSnackbar();
@@ -30,10 +30,10 @@ export default function UserCard(props) {
     }, []);
 
     const handleUpdateUser = () => {
-        updateUser(props.selectedUser.user_id, username, roleID)
+        updateUser(props.selectedUser.id, username, role)
             .then((response) => {
                 // ? Check if the user is currenly logged in, if so logout
-                if (props.currentUser.user_id == props.selectedUser.user_id) {
+                if (props.currentUser.id == props.selectedUser.id) {
                     enqueueSnackbar(
                         'Since you updated your user, you have been logged out',
                         {
@@ -58,10 +58,10 @@ export default function UserCard(props) {
     };
 
     const handleDeleteUser = () => {
-        deleteUser(props.selectedUser.user_id)
+        deleteUser(props.selectedUser.id)
             .then((response) => {
                 // ? Check if the user is currenly logged in, if so logout
-                if (props.currentUser.user_id == props.selectedUser.user_id) {
+                if (props.currentUser.id == props.selectedUser.id) {
                     enqueueSnackbar(
                         'Since you deleted your user, you have been logged out',
                         {
@@ -139,17 +139,14 @@ export default function UserCard(props) {
                             <InputLabel>Select role</InputLabel>
                             <Select
                                 label='Select role'
-                                value={roleID}
+                                value={role}
                                 onChange={(e) => {
-                                    setRoleID(e.target.value);
+                                    setRole(e.target.value);
                                 }}
                             >
                                 {roles.map((role) => (
-                                    <MenuItem
-                                        key={role.role_id}
-                                        value={role.role_id}
-                                    >
-                                        {role.role}
+                                    <MenuItem key={role.name} value={role.name}>
+                                        {role.name}
                                     </MenuItem>
                                 ))}
                             </Select>

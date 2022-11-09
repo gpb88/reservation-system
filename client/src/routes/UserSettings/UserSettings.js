@@ -1,48 +1,52 @@
 import * as React from 'react';
 import { Container, Grid, Button, Typography, Checkbox } from '@mui/material';
-import { BlockPicker } from 'react-color';
-import { getEventColors, getSettings, saveSettings } from 'API';
+import { getSettings, saveSettings, disableOtp, getUserByID } from 'API';
 import 'styles/user-settings.css';
+import GenerateOtp from 'routes/UserSettings/GenerateOtp';
 
 export default function UserSettings(props) {
-    const [colors, setColors] = React.useState([]);
     const [settings, setSettings] = React.useState({});
+    const [createCalendar, setCreateCalendar] = React.useState(false);
+    const [otpEnabled, setOtpEnabled] = React.useState(null);
+    const [showOtpWindow, setShowOtpWindow] = React.useState(false);
 
     React.useEffect(() => {
-        getSettings(props.user.user_id)
-            .then((response) => {
-                // ? Reassing array of object to single object
-                const settingsObj = response.reduce(
-                    (obj, item) =>
-                        Object.assign(obj, { [item.key]: item.value }),
-                    {}
-                );
-
-                setSettings(settingsObj);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-
-        getEventColors()
-            .then((response) => {
-                let objArr = Object.values(response);
-                let colorArr = [];
-                objArr.forEach((obj) => {
-                    colorArr.push(obj.background);
-                });
-
-                setColors(colorArr);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
+        syncSettings();
     }, []);
 
+    const syncSettings = () => {
+        getUserByID(props.user.id)
+            .then((response) => {
+                setOtpEnabled(response.otp_enabled);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+
+        getSettings(props.user.id)
+            .then((response) => {
+                setSettings(response);
+                setCreateCalendar(response.create_calendar);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    };
+
     const handleSaveSettings = () => {
-        saveSettings(props.user.user_id, settings).catch((err) => {
+        settings.otp_enabled = otpEnabled;
+        settings.create_calendar = createCalendar;
+
+        saveSettings(props.user.id, settings).catch((err) => {
             console.error(err);
         });
+    };
+
+    const handleOtp = async () => {
+        if (otpEnabled) {
+            await disableOtp(props.user.id);
+            syncSettings();
+        } else setShowOtpWindow(true);
     };
 
     return (
@@ -75,7 +79,7 @@ export default function UserSettings(props) {
                         variant='h6'
                         align='center'
                     >
-                        Google event color:
+                        Two factor authentication
                     </Typography>
                 </Grid>
                 <Grid
@@ -88,21 +92,19 @@ export default function UserSettings(props) {
                         justifyContent: 'center',
                     }}
                 >
-                    <BlockPicker
-                        onChange={(color) => {
-                            let newSettings = { ...settings };
-                            newSettings.google_event_color = String(
-                                colors.indexOf(color.hex)
-                            );
-
-                            setSettings(newSettings);
-                        }}
-                        className='color-picker'
-                        colors={colors}
-                        width='auto'
-                        color={colors[Number(settings.google_event_color)]}
-                        triangle='hide'
-                    />
+                    {otpEnabled != null ? (
+                        <Button
+                            variant='contained'
+                            sx={{
+                                fontSize: '18px',
+                                my: 6,
+                                width: '100px',
+                            }}
+                            onClick={handleOtp}
+                        >
+                            {otpEnabled ? 'Disable' : 'Enable'}
+                        </Button>
+                    ) : null}
                 </Grid>
 
                 <Grid
@@ -134,15 +136,9 @@ export default function UserSettings(props) {
                 >
                     <Checkbox
                         sx={{ transform: 'scale(1.5)' }}
-                        checked={
-                            settings.add_events_to_separate_calendar === 'true'
-                        }
+                        checked={createCalendar}
                         onChange={(e) => {
-                            let newSettings = { ...settings };
-                            newSettings.add_events_to_separate_calendar =
-                                String(e.target.checked);
-
-                            setSettings(newSettings);
+                            setCreateCalendar(e.target.checked);
                         }}
                     />
                 </Grid>
@@ -169,6 +165,16 @@ export default function UserSettings(props) {
                     </Button>
                 </Grid>
             </Grid>
+            {showOtpWindow ? (
+                <GenerateOtp
+                    open={showOtpWindow}
+                    close={() => {
+                        setShowOtpWindow(false);
+                    }}
+                    userID={props.user.id}
+                    syncSettings={syncSettings}
+                />
+            ) : null}
         </Container>
     );
 }

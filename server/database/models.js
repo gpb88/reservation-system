@@ -46,7 +46,21 @@ const User = sequelize.define(
         },
         password: {
             type: DataTypes.STRING(72),
+            allowNull: true,
+        },
+        otp_enabled: {
+            type: DataTypes.BOOLEAN,
             allowNull: false,
+            defaultValue: false,
+        },
+        external_type: {
+            type: DataTypes.STRING(16),
+            allowNull: true,
+        },
+        external_id: {
+            type: DataTypes.STRING(64),
+            allowNull: true,
+            unique: true,
         },
     },
     {
@@ -140,6 +154,35 @@ const Class = sequelize.define(
     }
 );
 
+const Settings = sequelize.define(
+    'Settings',
+    {
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: false,
+            primaryKey: true,
+            references: {
+                model: User,
+                key: 'id',
+            },
+        },
+        otp_secret: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: null,
+        },
+        create_calendar: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+        },
+    },
+    {
+        tableName: 'settings',
+        timestamps: false,
+    }
+);
+
 const Permission = sequelize.define(
     'Permission',
     {},
@@ -178,6 +221,15 @@ RefreshTokenHash.belongsTo(User, {
     targetKey: 'id',
 });
 
+User.hasOne(Settings, {
+    foreignKey: 'id',
+    targetKey: 'id',
+});
+Settings.belongsTo(User, {
+    foreignKey: 'id',
+    targetKey: 'id',
+});
+
 module.exports = {
     User,
     Role,
@@ -185,4 +237,5 @@ module.exports = {
     Class,
     Permission,
     RefreshTokenHash,
+    Settings,
 };

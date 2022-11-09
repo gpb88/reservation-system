@@ -1,21 +1,15 @@
-import {
-    validateAccessToken,
-    refreshToken,
-    validateRefreshToken,
-    createToken,
-} from 'API';
+import { validateAccessToken, refreshTokens, createToken } from 'API';
 
 export function getToken() {
     let accessToken = sessionStorage.getItem('accessToken');
-    if (accessToken === undefined)
-        accessToken = localStorage.getItem('accessToken');
+    if (accessToken == null) accessToken = localStorage.getItem('accessToken');
 
     return accessToken;
 }
 
 export function getUserID() {
     let userID = sessionStorage.getItem('userID');
-    if (userID === undefined) userID = localStorage.getItem('userID');
+    if (userID == null) userID = localStorage.getItem('userID');
 
     return userID;
 }
@@ -57,11 +51,7 @@ export async function checkToken(rememberMe) {
         );
 
         if (isAccessTokenValid == false) {
-            const isRefreshTokenValid = await validateRefreshToken();
-
-            if (isRefreshTokenValid) {
-                refresh(rememberMe, userID);
-            } else logOut = true;
+            logOut = refresh(rememberMe, userID);
         }
     } else {
         logOut = true;
@@ -71,7 +61,10 @@ export async function checkToken(rememberMe) {
 }
 
 async function refresh(rememberMe, userID) {
-    refreshToken(userID).then((accessToken) => {
-        setToken(rememberMe, accessToken, userID);
-    });
+    const refreshTokensData = await refreshTokens(userID);
+
+    if (refreshTokensData.isValid) {
+        setToken(rememberMe, refreshTokensData.accessToken, userID);
+        return false;
+    } else return true;
 }

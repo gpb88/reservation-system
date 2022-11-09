@@ -2,11 +2,10 @@ import { getUserByName } from 'API';
 import { verifyPass } from 'services/password';
 import { issueNewToken } from 'services/token';
 
-export async function handleLogin(userToCheck, rememberMe) {
+export async function verifyCredentials(userToCheck) {
     let authenticated = false;
-    let userData = await getUserByName(userToCheck.username).catch((err) => {
-        console.error(err);
-    });
+
+    const userData = await getUserByName(userToCheck.username);
 
     if (userData) {
         authenticated = await verifyPass(
@@ -17,7 +16,12 @@ export async function handleLogin(userToCheck, rememberMe) {
         });
     }
 
-    if (authenticated) await issueNewToken(userData.id, rememberMe);
+    console.log(userData);
+    if (authenticated) {
+        return userData;
+    } else return authenticated;
+}
 
-    return authenticated;
+export async function generateTokens(userID, rememberMe) {
+    await issueNewToken(userID, rememberMe);
 }

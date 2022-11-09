@@ -10,9 +10,20 @@ const {
 
 router.post('/refresh', async function (req, res) {
     const { userID } = req.body;
+    let refreshToken = req.cookies.refreshToken;
+
+    if (refreshToken) {
+        const isValid = await validateRefreshToken(refreshToken);
+        if (isValid == false) {
+            return res.status(200).send({ isValid: isValid });
+        }
+    } else {
+        console.log('No refresh token provided');
+        return res.status(200).send({ isValid: false });
+    }
 
     const accessToken = await createAccessToken(userID);
-    const refreshToken = await createRefreshToken(userID);
+    refreshToken = await createRefreshToken(userID);
 
     // ? If user wants to refresh, rotate both tokens, send them to user and save to DB
     res.cookie('refreshToken', refreshToken, {
@@ -20,7 +31,7 @@ router.post('/refresh', async function (req, res) {
         sameSite: 'None',
         secure: true,
     });
-    res.status(200).send({ accessToken: accessToken });
+    res.status(200).send({ isValid: true, accessToken: accessToken });
 });
 
 router.post('/validate/access', async function (req, res) {
@@ -36,17 +47,6 @@ router.post('/validate/access', async function (req, res) {
         });
 });
 
-router.post('/validate/refresh', async function (req, res) {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (refreshToken) {
-        const isValid = await validateRefreshToken(refreshToken);
-        res.status(200).send({ isValid: isValid });
-    } else {
-        return res.status(200).send({ isValid: false });
-    }
-});
-
 router.post('/create', async function (req, res) {
     const { userID } = req.body;
 
@@ -60,19 +60,6 @@ router.post('/create', async function (req, res) {
             secure: true,
         });
         res.status(200).send({ accessToken: accessToken });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send();
-    }
-});
-
-router.post('/user-id', async function (req, res) {
-    const { accessToken } = req.body;
-
-    try {
-        const userID = await getUserIdFromToken(accessToken);
-
-        res.status(200).send({ userID: userID });
     } catch (error) {
         console.log(error);
         res.status(500).send();

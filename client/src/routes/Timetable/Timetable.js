@@ -69,18 +69,49 @@ export default function Timetable(props) {
                 />
             ) : null}
             <Button
-                class='google-btn'
                 onClick={() => {
                     handleGoogleAuth();
                 }}
+                sx={{
+                    width: '184px',
+                    height: '42px',
+                    backgroundColor: '#4285f4',
+                    borderRadius: '4px',
+                    boxShadow: '0 3px 4px 0 rgba(0, 0, 0, .25) !important',
+                    display: 'flex',
+                    marginBottom: '10px',
+                    padding: 0,
+                    '&:hover': {
+                        boxShadow: '0 0 6px #4285f4',
+                        cursor: 'pointer',
+                    },
+                }}
             >
-                <Box class='google-icon-wrapper'>
-                    <img
-                        class='google-icon'
-                        src='https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg'
-                    />
+                <Box
+                    sx={{
+                        height: '42px',
+                        width: '42px',
+                        backgroundColor: '#fff',
+                        borderRadius: '4px 0 0 4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <img className='google-icon' src='/images/google.png' />
                 </Box>
-                <Typography class='btn-text'>Enable google calendar</Typography>
+                <Typography
+                    sx={{
+                        color: '#fff',
+                        fontSize: '12px',
+                        fontFamily: 'Roboto !important',
+                        margin: 0,
+                        display: 'flex',
+                        alignSelf: 'center',
+                    }}
+                >
+                    Enable google calendar
+                </Typography>
             </Button>
             <Calendar
                 localizer={localizer}

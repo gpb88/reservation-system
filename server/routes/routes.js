@@ -8,6 +8,7 @@ const permissions = require('routes/v1/permissions');
 const _class = require('routes/v1/class');
 const google = require('routes/v1/google');
 const settings = require('routes/v1/settings');
+const otp = require('routes/v1/otp');
 
 const version = 'v1';
 
@@ -20,4 +21,5 @@ module.exports = function (app) {
     app.use(`/${version}/class`, auth, _class);
     app.use(`/${version}/google`, auth, google);
     app.use(`/${version}/settings`, auth, settings);
+    app.use(`/${version}/otp`, auth, otp);
 };

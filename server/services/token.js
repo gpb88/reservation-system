@@ -7,7 +7,7 @@ function createAccessToken(userID) {
 
     const accessToken = jwt.sign({ userID }, key, {
         algorithm: 'RS256',
-        expiresIn: '15m',
+        expiresIn: '30m',
     });
 
     return accessToken;

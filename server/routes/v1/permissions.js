@@ -22,13 +22,13 @@ router.get('/', function (req, res) {
 router.post('/', function (req, res) {
     try {
         const { userID } = req.body;
-        let { permissions } = req.body;
+        let { machines } = req.body;
         let promises = [];
 
-        JSON.parse(permissions).forEach((permission) => {
-            let promise = permission.hasPermission
-                ? addPermission(userID, permission.machine_id)
-                : revokePermission(userID, permission.machine_id);
+        JSON.parse(machines).forEach((machine) => {
+            let promise = machine.hasPermission
+                ? addPermission(userID, machine.id)
+                : revokePermission(userID, machine.id);
             promises.push(promise);
         });
 

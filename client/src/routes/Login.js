@@ -8,9 +8,15 @@ import {
     Box,
     Typography,
     Container,
+    DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogActions,
+    Divider,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { handleLogin } from 'services/handleLogin';
+import { verifyCredentials, generateTokens } from 'services/handleLogin';
+import { verifyOtpSecret, getUserByExternalId, addExternalUser } from 'API';
 import { GoogleLogin } from '@react-oauth/google';
 import { OAuth2Client } from 'google-auth-library';
 import { useSnackbar } from 'notistack';
@@ -18,6 +24,9 @@ import { useSnackbar } from 'notistack';
 export default function Login(props) {
     let navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
+    const [token, setToken] = React.useState('');
+    const [showOtpWindow, setShowOtpWindow] = React.useState(false);
+    const [userId, setUserId] = React.useState(false);
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -28,20 +37,27 @@ export default function Login(props) {
             password: data.get('password'),
         };
 
-        const authenticated = await handleLogin(
-            loginUser,
-            props.rememberMe
-        ).catch((err) => {
-            enqueueSnackbar('Error occured!', {
-                variant: 'error',
-            });
-        });
+        // ? Equals user data/false
+        const authenticatedUser = await verifyCredentials(loginUser).catch(
+            (err) => {
+                enqueueSnackbar('Error occured!', {
+                    variant: 'error',
+                });
+            }
+        );
 
-        if (authenticated) navigate('/home');
-        else
-            enqueueSnackbar('Error occured!', {
-                variant: 'error',
-            });
+        console.log(authenticatedUser);
+
+        if (authenticatedUser !== false) {
+            if (authenticatedUser.otp_enabled) {
+                setUserId(authenticatedUser.id);
+                setShowOtpWindow(true);
+            } else {
+                generateTokens(authenticatedUser.id, props.rememberMe).then(
+                    () => navigate('/home')
+                );
+            }
+        }
     }
 
     const getDecodedOAuthJwtGoogle = async (clientID, token) => {
@@ -62,16 +78,54 @@ export default function Login(props) {
     };
 
     const handleGoogleLogin = async (response) => {
-        console.log(response);
-        let clientID = response.clientID;
-        let token = response.credential;
+        const clientID = response.clientID;
+        const token = response.credential;
 
-        const realUserData = await getDecodedOAuthJwtGoogle(clientID, token);
-        console.log(realUserData);
+        const googleUserData = await getDecodedOAuthJwtGoogle(clientID, token);
+        console.log(googleUserData);
+
+        try {
+            const authenticatedUser = await getUserByExternalId(
+                googleUserData.payload.sub,
+                'GOOGLE'
+            );
+
+            if (authenticatedUser.otp_enabled) {
+                setUserId(authenticatedUser.id);
+                setShowOtpWindow(true);
+            } else {
+                generateTokens(authenticatedUser.id, props.rememberMe).then(
+                    () => navigate('/home')
+                );
+            }
+        } catch (err) {
+            const newUser = await addExternalUser(
+                googleUserData.payload.name,
+                googleUserData.payload.sub,
+                'GOOGLE'
+            );
+
+            generateTokens(newUser.id, props.rememberMe).then(() => {
+                navigate('/home');
+            });
+        }
     };
 
     const handleChangeRememberMe = (event) => {
         props.setRememberMe(event.target.checked);
+    };
+
+    const handleOtpVerification = async () => {
+        const verified = await verifyOtpSecret(userId, token);
+        if (verified) {
+            generateTokens(userId, props.rememberMe).then(() => {
+                navigate('/home');
+            });
+        } else {
+            enqueueSnackbar('Error occured!', {
+                variant: 'error',
+            });
+        }
     };
 
     return (
@@ -149,6 +203,52 @@ export default function Login(props) {
                     />
                 </Box>
             </Grid>
+            {showOtpWindow ? (
+                <Dialog
+                    open={showOtpWindow}
+                    onClose={() => setShowOtpWindow(false)}
+                >
+                    <DialogTitle sx={{ mt: 2 }}>
+                        Please enter your OTP key
+                        <Divider sx={{ mt: 1 }} />
+                    </DialogTitle>
+                    <DialogContent
+                        sx={{ display: 'flex', justifyContent: 'center' }}
+                    >
+                        <TextField
+                            variant='outlined'
+                            label='Enter token'
+                            value={token}
+                            onChange={(e) => {
+                                setToken(e.target.value);
+                            }}
+                            sx={{ mt: 1 }}
+                        />
+                    </DialogContent>
+                    <DialogActions
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            mb: 2,
+                        }}
+                    >
+                        <Button
+                            variant='outlined'
+                            size='large'
+                            onClick={() => setShowOtpWindow(false)}
+                        >
+                            Close
+                        </Button>
+                        <Button
+                            variant='contained'
+                            size='large'
+                            onClick={handleOtpVerification}
+                        >
+                            Confirm
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            ) : null}
         </Container>
     );
 }

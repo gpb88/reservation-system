@@ -21,6 +21,8 @@ export default function AddClass(props) {
     const [classes, setClasses] = React.useState([]);
     const [machine, setMachine] = React.useState('');
     const [machines, setMachines] = React.useState([]);
+    const [eventStartTimes, setEventStartTimes] = React.useState([]);
+    const [eventEndTimes, setEventEndTimes] = React.useState([]);
 
     const { enqueueSnackbar } = useSnackbar();
 
@@ -84,8 +86,9 @@ export default function AddClass(props) {
     };
 
     const filterStartTimes = (time) => {
+        const dateFromPicker = new Date(time);
+        const today = new Date();
         let isAvailable = true;
-        // const dateFromPicker = new Date(time);
 
         // // ? Check if dates are already reseved
         // classes.forEach((_class) => {
@@ -100,46 +103,34 @@ export default function AddClass(props) {
         //     }
         // });
 
-        // // ? Exclude time already passed in current day
-        // const today = new Date();
-
-        // if (
-        //     dateFromPicker.getDay() == today.getDay() &&
-        //     dateFromPicker.getMonth() == today.getMonth() &&
-        //     dateFromPicker.getYear() == today.getYear() &&
-        //     dateFromPicker.getTime() <= today.getTime()
-        // )
-        //     isAvailable = false;
+        // ? Exclude hours that already passed in current day
+        if (
+            dateFromPicker.getYear() == today.getYear() &&
+            dateFromPicker.getMonth() == today.getMonth() &&
+            dateFromPicker.getDay() == today.getDay() &&
+            dateFromPicker.getTime() <= today.getTime()
+        )
+            isAvailable = false;
 
         return isAvailable;
     };
 
     const filterEndTimes = (time) => {
+        const dateFromPicker = new Date(time);
+        const today = new Date();
         let isAvailable = true;
-        // const dateFromPicker = new Date(time);
 
-        // // ? Check if dates are already reseved
-        // classes.forEach((_class) => {
-        //     const classStart = new Date(_class.start);
-        //     const classEnd = new Date(_class.end);
-
-        //     if (
-        //         classStart.getTime() <= dateFromPicker.getTime() &&
-        //         classEnd.getTime() >= dateFromPicker.getTime()
-        //     ) {
-        //         isAvailable = false;
-        //     }
-        // });
+        // ? Exclude hours that already passed in current day
+        if (
+            dateFromPicker.getYear() == today.getYear() &&
+            dateFromPicker.getMonth() == today.getMonth() &&
+            dateFromPicker.getDay() == today.getDay() &&
+            dateFromPicker.getTime() <= today.getTime()
+        )
+            isAvailable = false;
 
         return isAvailable;
     };
-
-    const times = [];
-    for (let i = 7; i <= 22; i++) {
-        for (let j = 0; j < 4; j++) {
-            times.push(i + ':' + (j === 0 ? '00' : 15 * j));
-        }
-    }
 
     return (
         <Container className='add-class'>
@@ -238,6 +229,9 @@ export default function AddClass(props) {
                             onChange={(date) => {
                                 setStartTime(date);
                             }}
+                            minTime={new Date().setHours(7, 0, 0)}
+                            maxTime={new Date().setHours(21, 0, 0)}
+                            excludeTimes={eventStartTimes}
                             excludeDateIntervals={[
                                 // ? Exclude dates before today
                                 {

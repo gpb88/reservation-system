@@ -19,6 +19,21 @@ export async function getUserByName(username) {
     return result;
 }
 
+export async function getUserByExternalId(externalId, externalType) {
+    const result = await axios
+        .get(baseUrl + '/user/external', {
+            params: { externalId: externalId, externalType: externalType },
+        })
+        .then(function (response) {
+            return response.data.user;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
 export async function getUserByID(userID) {
     const result = await axios
         .get(baseUrl + '/user', { params: { userID: userID } })
@@ -48,25 +63,6 @@ export async function validateAccessToken(token, userID) {
     return result;
 }
 
-export async function validateRefreshToken() {
-    const result = await axios
-        .post(
-            baseUrl + '/token/validate/refresh',
-            {},
-            {
-                withCredentials: true,
-            }
-        )
-        .then(function (response) {
-            return response.data.isValid;
-        })
-        .catch(function (error) {
-            console.error(error);
-        });
-
-    return result;
-}
-
 export async function createToken(userID) {
     const result = await axios
         .post(
@@ -86,11 +82,17 @@ export async function createToken(userID) {
     return result;
 }
 
-export async function refreshToken(userID) {
+export async function refreshTokens(userID) {
     const result = await axios
-        .post(baseUrl + '/token/refresh', { userID: userID })
+        .post(
+            baseUrl + '/token/refresh',
+            { userID: userID },
+            {
+                withCredentials: true,
+            }
+        )
         .then(function (response) {
-            return response.data.accessToken;
+            return response.data;
         })
         .catch(function (error) {
             console.error(error);
@@ -112,11 +114,12 @@ export async function getRoles() {
     return result;
 }
 
-export async function addMachine(name, description) {
+export async function addMachine(name, description, location) {
     const result = await axios
         .post(baseUrl + '/machine', {
             name: name,
             description: description,
+            location: location,
         })
         .then(function (response) {
             return response.data;
@@ -128,12 +131,13 @@ export async function addMachine(name, description) {
     return result;
 }
 
-export async function updateMachine(machineID, name, description) {
+export async function updateMachine(machineID, name, description, location) {
     const result = await axios
         .put(baseUrl + '/machine', {
             machineID: machineID,
             name: name,
             description: description,
+            location: location,
         })
         .then(function (response) {
             return response.data;
@@ -227,6 +231,23 @@ export async function addUser(username, role, password) {
     return result;
 }
 
+export async function addExternalUser(username, externalId, externalType) {
+    const result = await axios
+        .post(baseUrl + '/user/external', {
+            username: username,
+            externalId: externalId,
+            externalType: externalType,
+        })
+        .then(function (response) {
+            return response.data.user;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
 export async function updateUser(userID, username, role) {
     const result = await axios
         .put(baseUrl + '/user', {
@@ -259,11 +280,11 @@ export async function deleteUser(userID) {
     return result;
 }
 
-export async function setPermissions(userID, permissions) {
+export async function setPermissions(userID, machines) {
     const result = await axios
         .post(baseUrl + '/permissions', {
             userID: userID,
-            permissions: JSON.stringify(permissions),
+            machines: JSON.stringify(machines),
         })
         .then(function (response) {
             return response.data;
@@ -361,33 +382,6 @@ export async function sendGoogleAuthCode(accessCode) {
     return result;
 }
 
-export async function getCalendars() {
-    const result = await axios
-        .get(baseUrl + '/google/calendar')
-        .then(function (response) {
-            console.log(response);
-            return response.data.calendars;
-        })
-        .catch(function (error) {
-            console.error(error);
-        });
-
-    return result;
-}
-
-export async function createCalendar() {
-    const result = await axios
-        .post(baseUrl + '/google/calendar')
-        .then(function (response) {
-            return response.data;
-        })
-        .catch(function (error) {
-            console.error(error);
-        });
-
-    return result;
-}
-
 export async function uploadToGoogleCalendar(summary, start, end) {
     const result = await axios
         .post(baseUrl + '/google/event', {
@@ -397,33 +391,6 @@ export async function uploadToGoogleCalendar(summary, start, end) {
         })
         .then(function (response) {
             return response.data;
-        })
-        .catch(function (error) {
-            console.error(error);
-        });
-
-    return result;
-}
-
-export async function getCalendarColors() {
-    const result = await axios
-        .get(baseUrl + '/google/calendar/colors')
-        .then(function (response) {
-            return response.data.colors;
-        })
-        .catch(function (error) {
-            console.error(error);
-        });
-
-    return result;
-}
-
-export async function getEventColors() {
-    const result = await axios
-        .get(baseUrl + '/google/event/colors')
-        .then(function (response) {
-            console.log(response.data.colors);
-            return response.data.colors;
         })
         .catch(function (error) {
             console.error(error);
@@ -447,6 +414,21 @@ export async function getSettings(userID) {
     return result;
 }
 
+export async function getSetting(userID, key) {
+    const result = await axios
+        .get(baseUrl + '/settings/single', {
+            params: { userID: userID, key: key },
+        })
+        .then(function (response) {
+            return response.data.setting;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
 export async function saveSettings(userID, settings) {
     const result = await axios
         .post(baseUrl + '/settings', {
@@ -455,6 +437,52 @@ export async function saveSettings(userID, settings) {
         })
         .then(function (response) {
             return response;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function generateOtpSecret(userID) {
+    const result = await axios
+        .post(baseUrl + '/otp/generate-secret', {
+            userID: userID,
+        })
+        .then(function (response) {
+            return response.data.secret;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function verifyOtpSecret(userID, token) {
+    const result = await axios
+        .post(baseUrl + '/otp/verify-secret', {
+            userID: userID,
+            token: token,
+        })
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function disableOtp(userID) {
+    const result = await axios
+        .post(baseUrl + '/otp/disable', {
+            userID: userID,
+        })
+        .then(function (response) {
+            return response.data;
         })
         .catch(function (error) {
             console.error(error);

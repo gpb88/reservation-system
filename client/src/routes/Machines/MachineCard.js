@@ -17,11 +17,12 @@ export default function MachineCard(props) {
     const [description, setDescription] = React.useState(
         props.machine.description
     );
+    const [location, setLocation] = React.useState(props.machine.location);
 
     const { enqueueSnackbar } = useSnackbar();
 
     const handleUpdateMachine = () => {
-        updateMachine(props.machine.id, name, description)
+        updateMachine(props.machine.id, name, description, location)
             .then((response) => {
                 enqueueSnackbar('Machine has been updated!', {
                     variant: 'success',
@@ -38,7 +39,7 @@ export default function MachineCard(props) {
     };
 
     const handleDeleteMachine = () => {
-        deleteMachine(props.machine.machine_id)
+        deleteMachine(props.machine.id)
             .then((response) => {
                 enqueueSnackbar('Machine has been deleted!', {
                     variant: 'success',
@@ -114,6 +115,29 @@ export default function MachineCard(props) {
                             }}
                             multiline
                             rows={6}
+                        />
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Typography variant='h5'>Location:</Typography>
+                    </Grid>
+                    <Grid
+                        item
+                        xs={6}
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <TextField
+                            variant='outlined'
+                            label='Enter location'
+                            value={location}
+                            onChange={(e) => {
+                                setLocation(e.target.value);
+                            }}
+                            multiline
+                            rows={3}
                         />
                     </Grid>
                 </Grid>

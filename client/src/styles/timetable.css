@@ -2,44 +2,9 @@
 
 @import url(https://fonts.googleapis.com/css?family=Roboto:500);
 
-.google-btn {
-	width: 184px;
-	height: 42px;
-	background-color: #4285f4;
-	border-radius: 2px;
-	box-shadow: 0 3px 4px 0 rgba(0, 0, 0, .25);
-	display: flex;
-	margin-bottom: 10px;
-	padding: 0;
-}
-
-.google-btn:hover {
-	box-shadow: 0 0 6px #4285f4;
-	cursor: pointer;
-}
-
-.google-icon-wrapper {
-	height: 40px;
-	width: 40px;
-	background-color: #fff;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
 .google-icon {
 	width: 18px;
 	height: 18px;
-}
-
-.btn-text {
-	color: #fff;
-	font-size: 14px;
-	letter-spacing: 0.2px;
-	font-family: "Roboto";
-	margin: 0;
-	display: flex;
-	align-self: center;
 }
 
 .appointment-table {

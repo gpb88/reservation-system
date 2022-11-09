@@ -34,14 +34,14 @@ router.get('/all', function (req, res) {
 });
 
 router.put('/', function (req, res) {
-    const { machineID, name, description } = req.body;
+    const { machineID, name, description, location } = req.body;
 
     if (!machineID || !name) {
         console.log('Incomplete data');
         return res.status(400).send();
     }
 
-    updateMachine(machineID, name, description)
+    updateMachine(machineID, name, description, location)
         .then(() => {
             res.status(200).send();
         })
@@ -52,7 +52,7 @@ router.put('/', function (req, res) {
 });
 
 router.post('/', async function (req, res) {
-    const { name, description } = req.body;
+    const { name, description, location } = req.body;
 
     if (!name) {
         console.log('Incomplete data');
@@ -63,7 +63,7 @@ router.post('/', async function (req, res) {
 
     // * User not found => can be added
     if (machine == false || machine == null)
-        addMachine(name, description)
+        addMachine(name, description, location)
             .then(() => {
                 res.status(200).send();
             })
