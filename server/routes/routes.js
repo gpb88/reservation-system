@@ -9,6 +9,7 @@ const event = require('routes/v1/event');
 const google = require('routes/v1/google');
 const settings = require('routes/v1/settings');
 const otp = require('routes/v1/otp');
+const predict = require('routes/v1/predict');
 
 const version = 'v1';
 
@@ -22,4 +23,5 @@ module.exports = function (app) {
     app.use(`/${version}/google`, auth, google);
     app.use(`/${version}/settings`, auth, settings);
     app.use(`/${version}/otp`, auth, otp);
+    app.use(`/${version}/predict`, auth, predict);
 };

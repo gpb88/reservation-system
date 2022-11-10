@@ -126,8 +126,8 @@ export default function Timetable(props) {
                         style: {
                             backgroundColor:
                                 event.userID == props.userID
-                                    ? '#9E9E9E'
-                                    : '#' + event.hexColor,
+                                    ? '#' + event.hexColor
+                                    : '#9E9E9E',
                         },
                     };
                 }}

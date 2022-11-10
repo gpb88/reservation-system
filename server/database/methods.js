@@ -297,18 +297,14 @@ async function updateRefreshToken(userID, refreshTokenHash) {
 }
 
 async function getRefreshToken(userID) {
-    const user = await RefreshTokenHash.findOne(
-        {
-            attributes: ['refresh_token_hash'],
+    const refreshToken = await RefreshTokenHash.findOne({
+        where: {
+            id: userID,
         },
-        {
-            where: {
-                id: userID,
-            },
-        }
-    );
+        attributes: ['refresh_token_hash'],
+    });
 
-    return user;
+    return refreshToken;
 }
 
 async function deleteUser(ID) {
@@ -401,10 +397,10 @@ async function getSettings(userID) {
 
 async function getSetting(userID, key) {
     const setting = await Settings.findOne({
-        attributes: [key],
         where: {
             id: userID,
         },
+        attributes: [key],
     });
 
     return setting;

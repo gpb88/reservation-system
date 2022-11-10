@@ -490,3 +490,33 @@ export async function disableOtp(userID) {
 
     return result;
 }
+
+export async function predictTime(userID) {
+    const result = await axios
+        .post(baseUrl + '/predict/time', {
+            userID: userID,
+        })
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function predictMachine(userID) {
+    const result = await axios
+        .post(baseUrl + '/predict/machine', {
+            userID: userID,
+        })
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}

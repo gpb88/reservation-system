@@ -32,7 +32,7 @@ export default function Home(props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const isMenuOpen = Boolean(anchorEl);
 
-    const checkInterval = 60;
+    const checkInterval = 30;
     const navigate = useNavigate();
 
     const { enqueueSnackbar } = useSnackbar();

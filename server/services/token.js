@@ -49,6 +49,7 @@ async function validateRefreshToken(refreshToken) {
     try {
         const tokenData = jwt.verify(refreshToken, key);
         // ? Compare token with one hashed in DB
+
         const hashedRefreshToken = await getRefreshToken(tokenData.userID);
 
         isValid = await bcrypt.compare(
@@ -83,6 +84,7 @@ function writeRefreshTokenToDB(userID, refreshToken) {
     bcrypt
         .hash(refreshToken, 12)
         .then(function (hash) {
+            console.log(hash);
             updateRefreshToken(userID, hash);
         })
         .catch((err) => {
