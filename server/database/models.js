@@ -117,8 +117,8 @@ const Machine = sequelize.define(
     }
 );
 
-const Class = sequelize.define(
-    'Class',
+const Event = sequelize.define(
+    'Event',
     {
         id: {
             type: DataTypes.INTEGER,
@@ -149,13 +149,13 @@ const Class = sequelize.define(
         end_time: { type: DataTypes.DATE, allowNull: false },
     },
     {
-        tableName: 'classes',
+        tableName: 'events',
         timestamps: false,
     }
 );
 
-const Settings = sequelize.define(
-    'Settings',
+const Setting = sequelize.define(
+    'Setting',
     {
         id: {
             type: DataTypes.INTEGER,
@@ -203,7 +203,7 @@ Machine.belongsToMany(User, {
     targetKey: 'id',
 });
 
-Role.hasOne(User, {
+Role.hasMany(User, {
     foreignKey: 'role',
     targetKey: 'name',
 });
@@ -221,12 +221,21 @@ RefreshTokenHash.belongsTo(User, {
     targetKey: 'id',
 });
 
-User.hasOne(Settings, {
+User.hasOne(Setting, {
     foreignKey: 'id',
     targetKey: 'id',
 });
-Settings.belongsTo(User, {
+Setting.belongsTo(User, {
     foreignKey: 'id',
+    targetKey: 'id',
+});
+
+Machine.hasMany(Event, {
+    foreignKey: 'machine_id',
+    targetKey: 'id',
+});
+Event.belongsTo(Machine, {
+    foreignKey: 'machine_id',
     targetKey: 'id',
 });
 
@@ -234,8 +243,8 @@ module.exports = {
     User,
     Role,
     Machine,
-    Class,
+    Event,
     Permission,
     RefreshTokenHash,
-    Settings,
+    Setting,
 };

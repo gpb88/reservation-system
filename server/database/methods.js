@@ -1,13 +1,13 @@
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize, DataTypes, Op } = require('sequelize');
 const { sequelize } = require('database/controller');
 const {
     User,
     Role,
     Machine,
-    Class,
+    Event,
     Permission,
     RefreshTokenHash,
-    Settings,
+    Setting,
 } = require('database/models');
 const { defaultSettings } = require('services/defaultSettings');
 
@@ -45,10 +45,10 @@ async function createDefaults() {
     }
 
     // ? Create default users
-    const settings = await Settings.findAll();
+    const settings = await Setting.findAll();
 
     if (settings.length === 0) {
-        await Settings.bulkCreate([
+        await Setting.bulkCreate([
             {
                 id: 1,
                 create_calendar: false,
@@ -66,19 +66,19 @@ async function createDefaults() {
     if (machines.length === 0) {
         await Machine.bulkCreate([
             {
-                name: 'fsdfdsfds',
+                name: 'Machine 1',
             },
             {
-                name: 'gaadsadsad',
+                name: 'Machine 2',
             },
             {
-                name: 'fsdfdsgdafgdafds',
+                name: 'Machine 3',
             },
             {
-                name: 'gdfsg',
+                name: 'Machine 4',
             },
             {
-                name: 'ssgdf',
+                name: 'Machine 5',
             },
         ]);
     }
@@ -338,23 +338,38 @@ async function revokePermission(userID, machineID) {
 }
 
 async function getEvents() {
-    const classes = await Class.findAll();
+    const events = await Event.findAll();
 
-    return classes;
+    return events;
 }
 
 async function getEventsForUser(userID) {
-    const classes = await Class.findAll({
+    const events = await Event.findAll({
         where: {
             user_id: userID,
         },
     });
 
-    return classes;
+    return events;
+}
+
+async function getEventsForUserWithLimit(userID, limit) {
+    const events = await Event.findAll({
+        include: {
+            model: Machine,
+        },
+        where: {
+            user_id: userID,
+        },
+        limit: limit,
+        order: [['start_time', 'DESC']],
+    });
+
+    return events.reverse();
 }
 
 async function addEvent(userID, machineID, title, startTime, endTime) {
-    const newEvent = await Class.create({
+    const newEvent = await Event.create({
         user_id: userID,
         machine_id: machineID,
         title: title,
@@ -364,29 +379,56 @@ async function addEvent(userID, machineID, title, startTime, endTime) {
 
     return newEvent;
 }
+async function getEventsInDateRange(startTime, endTime, machineID) {
+    const events = await Event.findAll({
+        where: {
+            [Op.and]: [
+                {
+                    [Op.or]: [
+                        {
+                            start_time: {
+                                [Op.gt]: new Date(startTime),
+                                [Op.lt]: new Date(endTime),
+                            },
+                        },
+                        {
+                            end_time: {
+                                [Op.gt]: new Date(startTime),
+                                [Op.lt]: new Date(endTime),
+                            },
+                        },
+                    ],
+                },
+                { machine_id: machineID },
+            ],
+        },
+    });
+
+    return events;
+}
 
 async function deleteEvent(ID) {
-    const deletedClass = await Class.destroy({
+    const deletedEvent = await Event.destroy({
         where: {
             id: ID,
         },
     });
 
-    return deletedClass;
+    return deletedEvent;
 }
 
 async function addDefaultSettings(userID) {
-    const settings = await Settings.create({
+    const setting = await Setting.create({
         id: userID,
         otp: defaultSettings.otp,
         create_calendar: defaultSettings.create_calendar,
     });
 
-    return settings;
+    return setting;
 }
 
 async function getSettings(userID) {
-    const settings = await Settings.findOne({
+    const settings = await Setting.findOne({
         where: {
             id: userID,
         },
@@ -396,7 +438,7 @@ async function getSettings(userID) {
 }
 
 async function getSetting(userID, key) {
-    const setting = await Settings.findOne({
+    const setting = await Setting.findOne({
         where: {
             id: userID,
         },
@@ -407,7 +449,7 @@ async function getSetting(userID, key) {
 }
 
 async function updateSettings(userID, newSettings) {
-    const settings = await Settings.update(
+    const settings = await Setting.update(
         {
             otp: newSettings.otp,
             create_calendar: newSettings.create_calendar,
@@ -423,7 +465,7 @@ async function updateSettings(userID, newSettings) {
 }
 
 async function updateSetting(userID, key, value) {
-    const settings = await Settings.update(
+    const settings = await Setting.update(
         {
             [key]: value,
         },
@@ -469,4 +511,6 @@ module.exports = {
     updateUserOtp,
     addExternalUser,
     getUserByExternalID,
+    getEventsForUserWithLimit,
+    getEventsInDateRange,
 };

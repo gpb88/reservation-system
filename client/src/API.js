@@ -512,7 +512,22 @@ export async function predictMachine(userID) {
             userID: userID,
         })
         .then(function (response) {
-            return response.data;
+            return response.data.machine;
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+
+    return result;
+}
+
+export async function predictTitle(userID) {
+    const result = await axios
+        .post(baseUrl + '/predict/title', {
+            userID: userID,
+        })
+        .then(function (response) {
+            return response.data.title;
         })
         .catch(function (error) {
             console.error(error);

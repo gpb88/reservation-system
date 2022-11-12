@@ -11,40 +11,37 @@ import {
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'styles/add-event.css';
-import { getEvents, addEvent, getPermissions } from 'API';
+import {
+    addEvent,
+    getPermissions,
+    predictMachine,
+    predictTime,
+    predictTitle,
+} from 'API';
 import { useSnackbar } from 'notistack';
 
 export default function AddEvent(props) {
     const [title, setTitle] = React.useState('My Event');
     const [startTime, setStartTime] = React.useState(new Date());
     const [endTime, setEndTime] = React.useState(new Date());
-    const [events, setEvents] = React.useState([]);
     const [machine, setMachine] = React.useState('');
     const [machines, setMachines] = React.useState([]);
-    const [eventStartTimes, setEventStartTimes] = React.useState([]);
-    const [eventEndTimes, setEventEndTimes] = React.useState([]);
 
     const { enqueueSnackbar } = useSnackbar();
 
+    React.useEffect(async () => {
+        const predictedMachine = await predictMachine(props.user.id);
+        setMachine(predictedMachine);
+
+        const predictedTime = await predictTime(props.user.id);
+        setStartTime(predictedTime.dates.startTime);
+        setEndTime(predictedTime.dates.endTime);
+
+        const predictedTitle = await predictTitle(props.user.id);
+        setTitle(predictedTitle);
+    }, []);
+
     React.useEffect(() => {
-        getEvents()
-            .then((response) => {
-                let newEvents = [];
-
-                response.forEach((event) => {
-                    let newEvent = {};
-                    newEvent.start = new Date(event.start_time);
-                    newEvent.end = new Date(event.end_time);
-
-                    newEvents.push(newEvent);
-                });
-
-                setEvents(newEvents);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-
         getPermissions(props.user.id)
             .then((response) => {
                 setMachines(response);
@@ -73,10 +70,15 @@ export default function AddEvent(props) {
             new Date(startTime),
             new Date(endTime)
         )
-            .then(() => {
-                return enqueueSnackbar('Event has been added', {
-                    variant: 'success',
-                });
+            .then((response) => {
+                if (response.reserved)
+                    return enqueueSnackbar('Please select available timeframe', {
+                        variant: 'warning',
+                    });
+                else
+                    return enqueueSnackbar('Event has been added', {
+                        variant: 'success',
+                    });
             })
             .catch(() => {
                 return enqueueSnackbar('Error occured', {
@@ -89,19 +91,6 @@ export default function AddEvent(props) {
         const dateFromPicker = new Date(time);
         const today = new Date();
         let isAvailable = true;
-
-        // // ? Check if dates are already reseved
-        // events.forEach((event) => {
-        //     const classStartDate = new Date(event.start);
-        //     const classEndDate = new Date(event.end);
-
-        //     if (
-        //         classStartDate.getTime() <= dateFromPicker.getTime() &&
-        //         classEndDate.getTime() >= dateFromPicker.getTime()
-        //     ) {
-        //         isAvailable = false;
-        //     }
-        // });
 
         // ? Exclude hours that already passed in current day
         if (
@@ -231,7 +220,6 @@ export default function AddEvent(props) {
                             }}
                             minTime={new Date().setHours(7, 0, 0)}
                             maxTime={new Date().setHours(21, 0, 0)}
-                            excludeTimes={eventStartTimes}
                             excludeDateIntervals={[
                                 // ? Exclude dates before today
                                 {

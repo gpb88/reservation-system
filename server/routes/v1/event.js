@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { getEvents, addEvent, deleteEvent } = require('database/methods');
+const {
+    getEvents,
+    addEvent,
+    deleteEvent,
+    getEventsInDateRange,
+} = require('database/methods');
 
 router.get('/all', function (req, res) {
     getEvents()
@@ -13,12 +18,17 @@ router.get('/all', function (req, res) {
         });
 });
 
-router.post('/', function (req, res) {
+router.post('/', async function (req, res) {
     let { userID, machineID, title, startTime, endTime } = req.body;
+
+    let events = await getEventsInDateRange(startTime, endTime, machineID);
+    console.log(events);
+
+    if (events.length !== 0) return res.status(200).send({ reserved: true });
 
     addEvent(userID, machineID, title, startTime, endTime)
         .then(() => {
-            res.status(200).send();
+            res.status(200).send({ reserved: false });
         })
         .catch((err) => {
             console.log(err);
