@@ -21,6 +21,11 @@ router.get('/all', function (req, res) {
 router.post('/', async function (req, res) {
     let { userID, machineID, title, startTime, endTime } = req.body;
 
+    if (!userID || !machineID || !title || !startTime || !endTime) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
+
     let events = await getEventsInDateRange(startTime, endTime, machineID);
     console.log(events);
 
@@ -41,7 +46,7 @@ router.delete('/', function (req, res) {
 
     if (!eventID) {
         console.log('Incomplete data');
-        return res.status(400).send();
+        return res.status(402).send();
     }
 
     deleteEvent(eventID)

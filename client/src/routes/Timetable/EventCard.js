@@ -160,19 +160,21 @@ export default function Timetable(props) {
                     />
                     Add to Google Calendar
                 </Button>
-                <Button
-                    color='error'
-                    size='large'
-                    variant='contained'
-                    onClick={handleDelete}
-                    sx={{
-                        '&:hover': {
-                            backgroundColor: '#9a0007 !important',
-                        },
-                    }}
-                >
-                    Delete
-                </Button>
+                {props.userID === props.event.userID ? (
+                    <Button
+                        color='error'
+                        size='large'
+                        variant='contained'
+                        onClick={handleDelete}
+                        sx={{
+                            '&:hover': {
+                                backgroundColor: '#9a0007 !important',
+                            },
+                        }}
+                    >
+                        Delete
+                    </Button>
+                ) : null}
             </DialogActions>
         </Dialog>
     );

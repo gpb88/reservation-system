@@ -9,6 +9,11 @@ const {
 router.get('/', function (req, res) {
     const { userID } = req.query;
 
+    if (!userID) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
+
     getPermisions(userID)
         .then((permissions) => {
             res.status(200).send({ permissions: permissions });
@@ -24,6 +29,11 @@ router.post('/', function (req, res) {
         const { userID } = req.body;
         let { machines } = req.body;
         let promises = [];
+
+        if (!userID || !machines) {
+            console.log('Incomplete data');
+            return res.status(402).send();
+        }
 
         JSON.parse(machines).forEach((machine) => {
             let promise = machine.hasPermission

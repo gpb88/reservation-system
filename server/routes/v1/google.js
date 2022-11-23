@@ -29,55 +29,80 @@ router.get('/authorize/check', function (req, res) {
 });
 
 router.get('/authorize/url', function (req, res) {
-    const url = oauth2Client.generateAuthUrl({
-        // 'online' (default) or 'offline' (gets refresh_token)
-        access_type: 'offline',
+    try {
+        const url = oauth2Client.generateAuthUrl({
+            // 'online' (default) or 'offline' (gets refresh_token)
+            access_type: 'offline',
 
-        // If you only need one scope you can pass it as a string
-        scope: scopes,
-    });
+            // If you only need one scope you can pass it as a string
+            scope: scopes,
+        });
 
-    res.status(200).send({ url: url });
+        res.status(200).send({ url: url });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send();
+    }
 });
 
 router.post('/authorize/code', async function (req, res) {
     let { accessCode } = req.body;
 
-    const { tokens } = await oauth2Client.getToken(accessCode);
-    oauth2Client.setCredentials(tokens);
+    if (!accessCode) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
 
-    res.status(200).send();
+    try {
+        const { tokens } = await oauth2Client.getToken(accessCode);
+        oauth2Client.setCredentials(tokens);
+
+        res.status(200).send();
+    } catch (error) {
+        console.log(error);
+        res.status(500).send();
+    }
 });
 
 router.post('/event', async function (req, res) {
     let { summary, start, end } = req.body;
 
-    const timeZone = 'Europe/Warsaw';
-    const colorID = 1;
-    const event = {
-        summary: summary,
-        // description: 'Test description',
-        start: {
-            dateTime: start,
-            timeZone: timeZone,
-        },
-        end: {
-            dateTime: end,
-            timeZone: timeZone,
-        },
-        colorID: colorID,
-    };
+    if (!summary || !start || !end) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
 
-    googleCalendar.events
-        .insert({ calendarID: 'primary', resource: event })
-        .then((response) => {
-            console.log('Event added');
-            res.status(200).send();
-        })
-        .catch((err) => {
-            console.log(err);
-            res.status(500).send();
-        });
+    try {
+        const timeZone = 'Europe/Warsaw';
+        const colorID = 1;
+        const event = {
+            summary: summary,
+            // description: 'Test description',
+            start: {
+                dateTime: start,
+                timeZone: timeZone,
+            },
+            end: {
+                dateTime: end,
+                timeZone: timeZone,
+            },
+            colorID: colorID,
+        };
+
+        googleCalendar.events
+            .insert({ calendarId: 'primary', resource: event })
+            .then((response) => {
+                console.log('Event added');
+                res.status(200).send();
+            })
+            .catch((err) => {
+                console.log(err);
+                res.status(500).send();
+            });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send();
+    }
 });
 
 router.get('/calendar', function (req, res) {

@@ -12,30 +12,40 @@ router.post('/refresh', async function (req, res) {
     const { userID } = req.body;
     let refreshToken = req.cookies.refreshToken;
 
-    if (refreshToken) {
+    if (!userID || !refreshToken) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
+
+    try {
         const isValid = await validateRefreshToken(refreshToken);
         if (isValid == false) {
             return res.status(200).send({ isValid: isValid });
         }
-    } else {
-        console.log('No refresh token provided');
-        return res.status(200).send({ isValid: false });
+
+        const accessToken = await createAccessToken(userID);
+        refreshToken = await createRefreshToken(userID);
+
+        // ? If user wants to refresh, rotate both tokens, send them to user and save to DB
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            sameSite: 'None',
+            secure: true,
+        });
+        res.status(200).send({ isValid: true, accessToken: accessToken });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send();
     }
-
-    const accessToken = await createAccessToken(userID);
-    refreshToken = await createRefreshToken(userID);
-
-    // ? If user wants to refresh, rotate both tokens, send them to user and save to DB
-    res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        sameSite: 'None',
-        secure: true,
-    });
-    res.status(200).send({ isValid: true, accessToken: accessToken });
 });
 
 router.post('/validate/access', async function (req, res) {
-    const { token, userID } = req.body;
+    const { userID, token } = req.body;
+
+    if (!userID || !token) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
 
     validateAccessToken(token, userID)
         .then((isValid) => {
@@ -47,8 +57,13 @@ router.post('/validate/access', async function (req, res) {
         });
 });
 
-router.post('/create', async function (req, res) {
+router.post('/generate', async function (req, res) {
     const { userID } = req.body;
+
+    if (!userID) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
 
     try {
         const accessToken = await createAccessToken(userID);

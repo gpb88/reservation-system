@@ -38,103 +38,137 @@ function createDates(timeFrame) {
     return { startTime: startTime.getTime(), endTime: endTime.getTime() };
 }
 
-router.post('/time', async function (req, res) {
-    const { userID } = req.body;
+router.get('/dates', async function (req, res) {
+    const { userID } = req.query;
     const limit = 10;
 
-    const events = await getEventsForUserWithLimit(userID, limit);
-    const lastEntry = events[events.length - 1].dataValues;
-    const lastSelectedTimeframe = createTimeFrame(
-        lastEntry.start_time,
-        lastEntry.end_time
-    );
-
-    // ? Generate Markov chain
-    const markovChain = {};
-    for (let i = 0; i < events.length; i++) {
-        const currentTimeframe = createTimeFrame(
-            events[i].dataValues.start_time,
-            events[i].dataValues.end_time
-        );
-        const nextTimeframe = events[i + 1]
-            ? createTimeFrame(
-                  events[i + 1].dataValues.start_time,
-                  events[i + 1].dataValues.end_time
-              )
-            : null;
-
-        if (!markovChain[currentTimeframe]) {
-            markovChain[currentTimeframe] = [];
-        }
-        if (nextTimeframe) {
-            markovChain[currentTimeframe].push(nextTimeframe);
-        }
+    if (!userID) {
+        console.log('Incomplete data');
+        return res.status(402).send();
     }
 
-    const chainLength = markovChain[lastSelectedTimeframe].length;
-    const result =
-        markovChain[lastSelectedTimeframe][
-            Math.floor(Math.random() * chainLength)
-        ];
+    try {
+        const events = await getEventsForUserWithLimit(userID, limit);
+        if (events.length > 0) {
+            const lastEntry = events[events.length - 1].dataValues;
+            const lastSelectedTimeframe = createTimeFrame(
+                lastEntry.start_time,
+                lastEntry.end_time
+            );
 
-    // console.log(markovChain);
-    // console.log(result);
+            // ? Generate Markov chain
+            const markovChain = {};
+            for (let i = 0; i < events.length; i++) {
+                const currentTimeframe = createTimeFrame(
+                    events[i].dataValues.start_time,
+                    events[i].dataValues.end_time
+                );
+                const nextTimeframe = events[i + 1]
+                    ? createTimeFrame(
+                          events[i + 1].dataValues.start_time,
+                          events[i + 1].dataValues.end_time
+                      )
+                    : null;
 
-    // ? Create new dates
-    let dates = createDates(result);
-    console.log(dates);
+                if (!markovChain[currentTimeframe]) {
+                    markovChain[currentTimeframe] = [];
+                }
+                if (nextTimeframe) {
+                    markovChain[currentTimeframe].push(nextTimeframe);
+                }
+            }
 
-    res.status(200).send({ dates: dates });
+            const chainLength = markovChain[lastSelectedTimeframe].length;
+            const result =
+                markovChain[lastSelectedTimeframe][
+                    Math.floor(Math.random() * chainLength)
+                ];
+
+            // console.log(markovChain);
+            // console.log(result);
+
+            // ? Create new dates
+            let dates = createDates(result);
+            console.log(dates);
+
+            res.status(200).send({ dates: dates });
+        } else {
+            const now = new Date();
+
+            res.status(200).send({
+                dates: {
+                    startTime: now.getTime(),
+                    endTime: now.getTime(),
+                },
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send();
+    }
 });
 
-router.post('/machine', async function (req, res) {
-    const { userID } = req.body;
+router.get('/machine', async function (req, res) {
+    const { userID } = req.query;
     const limit = 10;
 
-    const events = await getEventsForUserWithLimit(userID, limit);
-    const lastEntry = events[events.length - 1].dataValues;
-    const lastSelectedMachine = lastEntry.Machine.dataValues.name;
-
-    // ? Generate Markov chain
-    const markovChain = {};
-    for (let i = 0; i < events.length; i++) {
-        const currentMachine = events[i].dataValues.Machine.dataValues.name;
-        const nextMachine =
-            events[i + 1]?.dataValues?.Machine?.dataValues?.name;
-
-        if (!markovChain[currentMachine]) {
-            markovChain[currentMachine] = [];
-        }
-        if (nextMachine) {
-            markovChain[currentMachine].push(nextMachine);
-        }
+    if (!userID) {
+        console.log('Incomplete data');
+        return res.status(402).send();
     }
 
-    const chainLength = markovChain[lastSelectedMachine].length;
-    const result =
-        markovChain[lastSelectedMachine][
-            Math.floor(Math.random() * chainLength)
-        ];
+    try {
+        const events = await getEventsForUserWithLimit(userID, limit);
+        if (events.length > 0) {
+            const lastEntry = events[events.length - 1].dataValues;
+            const lastSelectedMachine = lastEntry.Machine.dataValues.name;
 
-    console.log(markovChain);
+            // ? Generate Markov chain
+            const markovChain = {};
+            for (let i = 0; i < events.length; i++) {
+                const currentMachine =
+                    events[i].dataValues.Machine.dataValues.name;
+                const nextMachine =
+                    events[i + 1]?.dataValues?.Machine?.dataValues?.name;
 
-    if (result) {
-        const machine = await getMachineByName(result);
+                if (!markovChain[currentMachine]) {
+                    markovChain[currentMachine] = [];
+                }
+                if (nextMachine) {
+                    markovChain[currentMachine].push(nextMachine);
+                }
+            }
 
-        res.status(200).send({ machine: machine.dataValues.id });
-    } else {
-        res.status(200).send({ machine: '' });
+            const chainLength = markovChain[lastSelectedMachine].length;
+            const result =
+                markovChain[lastSelectedMachine][
+                    Math.floor(Math.random() * chainLength)
+                ];
+
+            console.log(markovChain);
+
+            if (result) {
+                const machine = await getMachineByName(result);
+
+                res.status(200).send({ machine: machine.dataValues.id });
+            } else {
+                res.status(200).send({ machine: '' });
+            }
+        } else res.status(200).send({ machine: '' });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send();
     }
 });
 
-router.post('/title', async function (req, res) {
-    const { userID } = req.body;
-    const limit = 1;
+// router.post('/title', async function (req, res) {
+//     const { userID } = req.body;
+//     const limit = 1;
 
-    const events = await getEventsForUserWithLimit(userID, limit);
-    const title = events[0]?.dataValues?.title;
+//     const events = await getEventsForUserWithLimit(userID, limit);
+//     const title = events[0]?.dataValues?.title;
 
-    res.status(200).send({ title: title ? title : '' });
-});
+//     res.status(200).send({ title: title ? title : '' });
+// });
 
 module.exports = router;

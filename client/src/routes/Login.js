@@ -66,7 +66,7 @@ export default function Login(props) {
         try {
             const client = new OAuth2Client(CLIENT_ID_GOOGLE);
 
-            const ticket = await client.verifyIDToken({
+            const ticket = await client.verifyIdToken({
                 idToken: token,
                 audience: CLIENT_ID_GOOGLE,
             });
@@ -78,11 +78,10 @@ export default function Login(props) {
     };
 
     const handleGoogleLogin = async (response) => {
-        const clientID = response.clientID;
+        const clientId = response.clientId;
         const token = response.credential;
 
-        const googleUserData = await getDecodedOAuthJwtGoogle(clientID, token);
-        console.log(googleUserData);
+        const googleUserData = await getDecodedOAuthJwtGoogle(clientId, token);
 
         try {
             const authenticatedUser = await getUserByExternalID(

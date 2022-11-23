@@ -18,7 +18,7 @@ router.get('/', async function (req, res) {
 
         if (!username && !userID) {
             console.log('No username or ID');
-            return res.status(400).send();
+            return res.status(402).send();
         }
 
         let user = null;
@@ -27,7 +27,7 @@ router.get('/', async function (req, res) {
 
         if (user == false || user == null) {
             console.log('User not found');
-            return res.status(400).send();
+            return res.status(404).send();
         }
 
         res.status(200).send({ user: user });
@@ -43,14 +43,14 @@ router.get('/external', async function (req, res) {
 
         if (!externalID && !externalType) {
             console.log('No type or ID');
-            return res.status(400).send();
+            return res.status(402).send();
         }
 
         const user = await getUserByExternalID(externalID, externalType);
 
         if (user == false || user == null) {
             console.log('User not found');
-            return res.status(400).send();
+            return res.status(404).send();
         }
 
         res.status(200).send({ user: user });
@@ -74,9 +74,9 @@ router.get('/all', function (req, res) {
 router.put('/', function (req, res) {
     const { userID, username, role } = req.body;
 
-    if (!username || !role) {
+    if (!userID || !username || !role) {
         console.log('Incomplete data');
-        return res.status(400).send();
+        return res.status(402).send();
     }
 
     updateUser(userID, username, role)
@@ -90,28 +90,20 @@ router.put('/', function (req, res) {
 });
 
 router.post('/', async function (req, res) {
+    const { username, role, password } = req.body;
+
+    if (!username || !role || !password) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
+		
     try {
-        const { username, role, password } = req.body;
-
-        if (!username || !role || !password) {
-            console.log('Incomplete data');
-            return res.status(200).send();
-        }
-
         const user = await getUserByName(username);
 
         if (user == false || user == null) {
-            const newUser = await addUser(username, role, password).catch(
-                (err) => {
-                    console.log(err);
-                    res.status(500).send();
-                }
-            );
+            const newUser = await addUser(username, role, password);
 
-            addDefaultSettings(newUser.id).catch((err) => {
-                console.log(err);
-                res.status(500).send();
-            });
+            addDefaultSettings(newUser.id);
 
             res.status(200).send();
         }
@@ -122,14 +114,14 @@ router.post('/', async function (req, res) {
 });
 
 router.post('/external', async function (req, res) {
+    const { username, externalID, externalType } = req.body;
+
+    if (!username || !externalID || !externalType) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
+
     try {
-        const { username, externalID, externalType } = req.body;
-
-        if (!username || !externalID || !externalType) {
-            console.log('Incomplete data');
-            return res.status(200).send();
-        }
-
         const user = await getUserByExternalID(externalID, externalType);
 
         if (user == false || user == null) {
@@ -137,15 +129,9 @@ router.post('/external', async function (req, res) {
                 username,
                 externalID,
                 externalType
-            ).catch((err) => {
-                console.log(err);
-                res.status(500).send();
-            });
+            );
 
-            addDefaultSettings(newUser.id).catch((err) => {
-                console.log(err);
-                res.status(500).send();
-            });
+            addDefaultSettings(newUser.id);
 
             res.status(200).send({ user: newUser });
         }

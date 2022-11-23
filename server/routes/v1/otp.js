@@ -7,38 +7,68 @@ const {
     updateUserOtp,
 } = require('database/methods');
 
-router.post('/generate-secret', function (req, res) {
-    const { userID } = req.body;
+router.get('/secret/generate', function (req, res) {
+    const { userID } = req.query;
+
+    if (!userID) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
 
     const secret = speakeasy.generateSecret({ name: 'AGH-RS' });
-    updateSetting(userID, 'otp_secret', secret.base32);
-
-    res.status(200).send({ secret: secret });
+    updateSetting(userID, 'otp_secret', secret.base32)
+        .then(() => {
+            res.status(200).send({ secret: secret });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send();
+        });
 });
 
-router.post('/verify-secret', async function (req, res) {
+router.post('/secret/verify', async function (req, res) {
     const { userID, token } = req.body;
 
-    const data = await getSetting(userID, 'otp_secret');
+    if (!userID || !token) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
 
-    const verified = speakeasy.totp.verify({
-        secret: data.otp_secret,
-        encoding: 'base32',
-        token: token,
-    });
+    try {
+        const data = await getSetting(userID, 'otp_secret');
 
-    if (verified) updateUserOtp(userID, true);
+        const verified = speakeasy.totp.verify({
+            secret: data.otp_secret,
+            encoding: 'base32',
+            token: token,
+        });
 
-    res.status(200).send({ verified: verified });
+        if (verified) updateUserOtp(userID, true);
+
+        res.status(200).send({ verified: verified });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send();
+    }
 });
 
 router.post('/disable', async function (req, res) {
     const { userID } = req.body;
 
-    updateUserOtp(userID, false);
-    updateSetting(userID, 'otp_secret', null);
+    if (!userID) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
 
-    res.status(200).send();
+    try {
+        updateUserOtp(userID, false);
+        updateSetting(userID, 'otp_secret', null);
+
+        res.status(200).send();
+    } catch (error) {
+        console.log(error);
+        res.status(500).send();
+    }
 });
 
 module.exports = router;

@@ -4,7 +4,6 @@ import { updateHeader } from 'interceptors/token';
 const version = 'v1';
 const baseUrl = 'http://127.0.0.1:8080/' + version;
 updateHeader(axios);
-// ? Accept cookies
 
 export async function getUserByName(username) {
     const result = await axios
@@ -66,7 +65,7 @@ export async function validateAccessToken(token, userID) {
 export async function createToken(userID) {
     const result = await axios
         .post(
-            baseUrl + '/token/create',
+            baseUrl + '/token/generate',
             { userID: userID },
             {
                 withCredentials: true,
@@ -103,7 +102,7 @@ export async function refreshTokens(userID) {
 
 export async function getRoles() {
     const result = await axios
-        .get(baseUrl + '/roles')
+        .get(baseUrl + '/role/all')
         .then(function (response) {
             return response.data.roles;
         })
@@ -447,9 +446,7 @@ export async function saveSettings(userID, settings) {
 
 export async function generateOtpSecret(userID) {
     const result = await axios
-        .post(baseUrl + '/otp/generate-secret', {
-            userID: userID,
-        })
+        .get(baseUrl + '/otp/secret/generate', { params: { userID: userID } })
         .then(function (response) {
             return response.data.secret;
         })
@@ -462,7 +459,7 @@ export async function generateOtpSecret(userID) {
 
 export async function verifyOtpSecret(userID, token) {
     const result = await axios
-        .post(baseUrl + '/otp/verify-secret', {
+        .post(baseUrl + '/otp/secret/verify', {
             userID: userID,
             token: token,
         })
@@ -491,11 +488,9 @@ export async function disableOtp(userID) {
     return result;
 }
 
-export async function predictTime(userID) {
+export async function predictDates(userID) {
     const result = await axios
-        .post(baseUrl + '/predict/time', {
-            userID: userID,
-        })
+        .get(baseUrl + '/predict/dates', { params: { userID: userID } })
         .then(function (response) {
             return response.data;
         })
@@ -508,9 +503,7 @@ export async function predictTime(userID) {
 
 export async function predictMachine(userID) {
     const result = await axios
-        .post(baseUrl + '/predict/machine', {
-            userID: userID,
-        })
+        .get(baseUrl + '/predict/machine', { params: { userID: userID } })
         .then(function (response) {
             return response.data.machine;
         })

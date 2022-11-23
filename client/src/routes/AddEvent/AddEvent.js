@@ -15,7 +15,7 @@ import {
     addEvent,
     getPermissions,
     predictMachine,
-    predictTime,
+    predictDates,
     predictTitle,
 } from 'API';
 import { useSnackbar } from 'notistack';
@@ -33,7 +33,7 @@ export default function AddEvent(props) {
         const predictedMachine = await predictMachine(props.user.id);
         setMachine(predictedMachine);
 
-        const predictedTime = await predictTime(props.user.id);
+        const predictedTime = await predictDates(props.user.id);
         setStartTime(predictedTime.dates.startTime);
         setEndTime(predictedTime.dates.endTime);
 

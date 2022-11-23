@@ -2,7 +2,7 @@ const auth = require('middleware/auth');
 
 const token = require('routes/v1/token');
 const user = require('routes/v1/user');
-const roles = require('routes/v1/roles');
+const role = require('routes/v1/role');
 const machine = require('routes/v1/machine');
 const permissions = require('routes/v1/permissions');
 const event = require('routes/v1/event');
@@ -15,7 +15,7 @@ const version = 'v1';
 
 module.exports = function (app) {
     app.use(`/${version}/user`, auth, user);
-    app.use(`/${version}/roles`, auth, roles);
+    app.use(`/${version}/role`, auth, role);
     app.use(`/${version}/token`, auth, token);
     app.use(`/${version}/machine`, auth, machine);
     app.use(`/${version}/permissions`, auth, permissions);

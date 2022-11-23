@@ -9,7 +9,7 @@ import { theme } from 'common/theme';
 import { ThemeProvider } from '@mui/material';
 
 ReactDOM.render(
-    <GoogleOAuthProvider clientID={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
         <SnackbarProvider maxSnack={3} autoHideDuration={5000}>
             <BrowserRouter>
                 <ThemeProvider theme={theme}>

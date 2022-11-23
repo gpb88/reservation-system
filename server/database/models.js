@@ -106,10 +106,10 @@ const Machine = sequelize.define(
             unique: true,
         },
         description: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(250),
             allowNull: true,
         },
-        location: { type: DataTypes.STRING, allowNull: true },
+        location: { type: DataTypes.STRING(100), allowNull: true },
     },
     {
         tableName: 'machines',
@@ -167,7 +167,7 @@ const Setting = sequelize.define(
             },
         },
         otp_secret: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(200),
             allowNull: true,
             defaultValue: null,
         },

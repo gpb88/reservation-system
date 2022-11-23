@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getRoles } = require('database/methods');
 
-router.get('/', function (req, res) {
+router.get('/all', function (req, res) {
     getRoles()
         .then((roles) => {
             res.status(200).send({ roles: roles });

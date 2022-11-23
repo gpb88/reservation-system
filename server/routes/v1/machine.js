@@ -12,9 +12,15 @@ const {
 router.get('/', function (req, res) {
     const { machineID } = req.query;
 
+    if (!machineID) {
+        console.log('Incomplete data');
+        return res.status(402).send();
+    }
+
     getMachineByID(machineID)
         .then((machine) => {
-            res.status(200).send({ machine: machine });
+            if (machine) res.status(200).send({ machine: machine });
+            else res.status(404).send();
         })
         .catch((err) => {
             console.log(err);
@@ -38,7 +44,7 @@ router.put('/', function (req, res) {
 
     if (!machineID || !name) {
         console.log('Incomplete data');
-        return res.status(400).send();
+        return res.status(402).send();
     }
 
     updateMachine(machineID, name, description, location)
@@ -56,7 +62,7 @@ router.post('/', async function (req, res) {
 
     if (!name) {
         console.log('Incomplete data');
-        return res.status(400).send();
+        return res.status(402).send();
     }
 
     const machine = await getMachineByName(name);
@@ -78,7 +84,7 @@ router.delete('/', function (req, res) {
 
     if (!machineID) {
         console.log('Incomplete data');
-        return res.status(400).send();
+        return res.status(402).send();
     }
 
     deleteMachine(machineID)

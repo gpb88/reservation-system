@@ -21,7 +21,7 @@ module.exports = async (req, res, next) => {
 
             if (isValid) {
                 next();
-            } else res.status(400).send();
+            } else res.status(401).send();
         }
     } catch (err) {
         console.log(err);

@@ -63,6 +63,7 @@ export default function Timetable(props) {
             {open ? (
                 <EventCard
                     open={open}
+                    userID={props.userID}
                     event={event}
                     handleClose={handleClose}
                     refreshEvents={refreshEvents}
