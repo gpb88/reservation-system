@@ -513,18 +513,3 @@ export async function predictMachine(userID) {
 
     return result;
 }
-
-export async function predictTitle(userID) {
-    const result = await axios
-        .post(baseUrl + '/predict/title', {
-            userID: userID,
-        })
-        .then(function (response) {
-            return response.data.title;
-        })
-        .catch(function (error) {
-            console.error(error);
-        });
-
-    return result;
-}

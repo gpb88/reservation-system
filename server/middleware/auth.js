@@ -9,7 +9,7 @@ module.exports = async (req, res, next) => {
             (method === 'GET' && url.includes('/user')) ||
             (method === 'POST' && url.includes('/user/external')) ||
             (method === 'POST' && url.includes('/token')) ||
-            (method === 'POST' && url.includes('/otp/verify-secret'));
+            (method === 'POST' && url.includes('/otp/secret/verify'));
 
         if (isRequestingLogin) {
             next();

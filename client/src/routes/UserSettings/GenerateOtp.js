@@ -55,7 +55,6 @@ export default function GenerateOtp(props) {
             <DialogTitle sx={{ mt: 2, pb: 2 }} variant='h5'>
                 Two Factor Authentication (2FA)
             </DialogTitle>
-            <Divider />
             <DialogContent>
                 <Grid container>
                     <Grid item xs={12}>

@@ -10,7 +10,7 @@ export function updateHeader(axios) {
                 (method === 'get' && url.includes('/user')) ||
                 (method === 'post' && url.includes('/user/external')) ||
                 (method === 'post' && url.includes('/token')) ||
-                (method === 'post' && url.includes('/otp/verify-secret'));
+                (method === 'post' && url.includes('/otp/secret/verify'));
 
             if (!isRequestingLogin) {
                 const jwtToken = getToken();

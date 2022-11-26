@@ -16,7 +16,6 @@ import {
     getPermissions,
     predictMachine,
     predictDates,
-    predictTitle,
 } from 'API';
 import { useSnackbar } from 'notistack';
 
@@ -36,9 +35,6 @@ export default function AddEvent(props) {
         const predictedTime = await predictDates(props.user.id);
         setStartTime(predictedTime.dates.startTime);
         setEndTime(predictedTime.dates.endTime);
-
-        const predictedTitle = await predictTitle(props.user.id);
-        setTitle(predictedTitle);
     }, []);
 
     React.useEffect(() => {

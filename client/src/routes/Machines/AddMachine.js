@@ -15,6 +15,7 @@ import { useSnackbar } from 'notistack';
 export default function AddMachine(props) {
     const [name, setName] = React.useState([]);
     const [description, setDescription] = React.useState('');
+    const [location, setLocation] = React.useState('');
 
     const { enqueueSnackbar} = useSnackbar();
 
@@ -25,6 +26,7 @@ export default function AddMachine(props) {
     const resetVariables = () => {
         setName('');
         setDescription('');
+        setLocation('');
     };
 
     async function handleAdd() {
@@ -33,7 +35,7 @@ export default function AddMachine(props) {
                 variant: 'error',
             });
         else {
-            addMachine(name, description).then(() => {
+            addMachine(name, description, location).then(() => {
                 enqueueSnackbar('Machine has been added!', {
                     variant: 'success',
                 });
@@ -102,6 +104,28 @@ export default function AddMachine(props) {
                             }}
                             multiline
                             rows={6}
+														inputProps={{ spellCheck: 'false' }}
+                        />
+                    </Grid>
+										<Grid item xs={6}>
+                        <Typography variant='h5'>Location:</Typography>
+                    </Grid>
+                    <Grid
+                        item
+                        xs={6}
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <TextField
+                            variant='outlined'
+                            label='Enter location'
+                            value={location}
+                            onChange={(e) => {
+                                setLocation(e.target.value);
+                            }}
                         />
                     </Grid>
                 </Grid>

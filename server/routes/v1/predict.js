@@ -7,34 +7,51 @@ const {
 
 function createTimeFrame(startTime, endTime) {
     return (
+        startTime.getDay() +
+        ':' +
         startTime.getHours() +
         ':' +
         startTime.getMinutes() +
         '-' +
+        endTime.getDay() +
+        ':' +
         endTime.getHours() +
         ':' +
         endTime.getMinutes()
     );
 }
 
+// https://codereview.stackexchange.com/questions/33527/find-next-occurring-friday-or-any-dayofweek
+function getNextDayOfWeek(date, dayOfWeek) {
+	var resultDate = new Date(date.getTime());
+
+	resultDate.setDate(date.getDate() + (7 + dayOfWeek - date.getDay()) % 7);
+
+	return resultDate;
+}
+
 function createDates(timeFrame) {
     let workday = new Date();
     workday.setDate(workday.getDate() + 1);
+		console.log(timeFrame)
 
     // ? Skip weekends
     if (workday.getDay() == 0) workday.setDate(workday.getDate() + 1);
     else if (workday.getDay() == 6) workday.setDate(workday.getDate() + 2);
 
     let startTime = new Date(workday.getTime());
-    startTime.setHours(timeFrame.split('-')[0].split(':')[0]);
-    startTime.setMinutes(timeFrame.split('-')[0].split(':')[1]);
+		startTime = getNextDayOfWeek(startTime, timeFrame.split('-')[0].split(':')[0])
+    startTime.setHours(timeFrame.split('-')[0].split(':')[1]);
+    startTime.setMinutes(timeFrame.split('-')[0].split(':')[2]);
     startTime.setSeconds(0);
 
     let endTime = new Date(workday.getTime());
-    endTime.setHours(timeFrame.split('-')[1].split(':')[0]);
-    endTime.setMinutes(timeFrame.split('-')[1].split(':')[1]);
+		endTime = getNextDayOfWeek(endTime, timeFrame.split('-')[0].split(':')[0])
+    endTime.setHours(timeFrame.split('-')[1].split(':')[1]);
+    endTime.setMinutes(timeFrame.split('-')[1].split(':')[2]);
     endTime.setSeconds(0);
 
+		console.log({ startTime: startTime, endTime: endTime })
     return { startTime: startTime.getTime(), endTime: endTime.getTime() };
 }
 
@@ -87,11 +104,22 @@ router.get('/dates', async function (req, res) {
             // console.log(markovChain);
             // console.log(result);
 
-            // ? Create new dates
-            let dates = createDates(result);
-            console.log(dates);
+            if (result) {
+                // ? Create new dates
+                let dates = createDates(result);
+                console.log(dates);
 
-            res.status(200).send({ dates: dates });
+                res.status(200).send({ dates: dates });
+            } else {
+                const now = new Date();
+
+                res.status(200).send({
+                    dates: {
+                        startTime: now.getTime(),
+                        endTime: now.getTime(),
+                    },
+                });
+            }
         } else {
             const now = new Date();
 
@@ -160,15 +188,5 @@ router.get('/machine', async function (req, res) {
         res.status(500).send();
     }
 });
-
-// router.post('/title', async function (req, res) {
-//     const { userID } = req.body;
-//     const limit = 1;
-
-//     const events = await getEventsForUserWithLimit(userID, limit);
-//     const title = events[0]?.dataValues?.title;
-
-//     res.status(200).send({ title: title ? title : '' });
-// });
 
 module.exports = router;

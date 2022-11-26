@@ -15,7 +15,7 @@ router.get('/secret/generate', function (req, res) {
         return res.status(402).send();
     }
 
-    const secret = speakeasy.generateSecret({ name: 'AGH-RS' });
+    const secret = speakeasy.generateSecret({ name: 'AGH-RS'});
     updateSetting(userID, 'otp_secret', secret.base32)
         .then(() => {
             res.status(200).send({ secret: secret });
